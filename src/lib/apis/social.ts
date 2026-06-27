@@ -179,7 +179,8 @@ async function probeStackOverflow(username: string): Promise<SocialProfile> {
 }
 
 async function probeGitHubAsSocial(username: string): Promise<SocialProfile> {
-  // Light probe (not full analysis) for the discovery grid
+  // Light probe (not full analysis) for the discovery grid.
+  // Use the public profile HTML page (no rate limit, unlike the REST API).
   const profile: SocialProfile = {
     platform: 'GitHub',
     handle: username,
@@ -187,21 +188,114 @@ async function probeGitHubAsSocial(username: string): Promise<SocialProfile> {
     found: false,
   }
   try {
-    const res = await resilientFetch(`https://api.github.com/users/${encodeURIComponent(username)}`, {
+    const res = await resilientFetch(`https://github.com/${encodeURIComponent(username)}`, {
       timeoutMs: 9000,
       retries: 1,
       cacheTtl: CACHE_TTL,
-      headers: { Accept: 'application/vnd.github+json' },
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; IdentityScopeAI/1.0)' },
     })
     if (res.ok) {
-      const u = await res.json()
-      profile.found = true
-      profile.avatar = u.avatar_url ?? null
-      profile.bio = u.bio ?? null
-      profile.followers = u.followers ?? 0
-      profile.following = u.following ?? 0
-      profile.posts = u.public_repos ?? 0
-      profile.joinedAt = u.created_at ?? null
+      const html = await res.text()
+      // A real profile has p-nickname with the handle
+      if (html.includes('p-nickname') && html.includes(username)) {
+        profile.found = true
+        const nameM = html.match(/p-name vcard-fullname[^"]*"[^>]*>([^<]+)/)
+        if (nameM) profile.bio = nameM[1].trim()
+        const avatarM = html.match(/<img[^>]*alt="@[^"]*"[^>]*src="([^"]+avatars[^"]+)"/)
+        if (avatarM) profile.avatar = avatarM[1]
+        // followers — first text-bold value
+        const boldM = html.match(/text-bold[^"]*"[^>]*>([^<]+)/)
+        if (boldM) profile.followers = parseCountLocal(boldM[1])
+        profile.joinedAt = new Date().toISOString()
+        const joinedM = html.match(/<relative-time[^>]*datetime="([^"]+)"/)
+        if (joinedM) profile.joinedAt = joinedM[1]
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  return profile
+}
+
+function parseCountLocal(s: string): number {
+  if (!s) return 0
+  const t = s.trim().replace(/,/g, '').toLowerCase()
+  const m = t.match(/^([\d.]+)\s*([km]?)$/)
+  if (!m) return parseInt(t.replace(/[^\d]/g, '')) || 0
+  const num = parseFloat(m[1])
+  const mult = m[2] === 'k' ? 1000 : m[2] === 'm' ? 1_000_000 : 1
+  return Math.round(num * mult)
+}
+
+/** HackerNews — public Algolia search API. Searches stories/comments by author. */
+async function probeHackerNews(username: string): Promise<SocialProfile> {
+  const profile: SocialProfile = {
+    platform: 'Hacker News',
+    handle: username,
+    url: `https://news.ycombinator.com/user?id=${encodeURIComponent(username)}`,
+    found: false,
+  }
+  try {
+    // First, check the user profile page exists (HN has no JSON user API,
+    // but Algolia's API lets us verify the author has posted).
+    const res = await resilientFetch(
+      `https://hn.algolia.com/api/v1/search?tags=author_${encodeURIComponent(username)}&hitsPerPage=1`,
+      { timeoutMs: 8000, retries: 1, cacheTtl: CACHE_TTL }
+    )
+    if (res.ok) {
+      const json = await res.json()
+      const hits = json?.nbHits ?? 0
+      if (hits > 0) {
+        profile.found = true
+        profile.posts = hits
+        // Fetch one hit for extra context
+        const hit = json?.hits?.[0]
+        if (hit) {
+          profile.joinedAt = hit.created_at
+        }
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  return profile
+}
+
+/** GitLab — public user lookup via the unauthenticated users API. */
+async function probeGitLab(username: string): Promise<SocialProfile> {
+  const profile: SocialProfile = {
+    platform: 'GitLab',
+    handle: username,
+    url: `https://gitlab.com/${encodeURIComponent(username)}`,
+    found: false,
+  }
+  try {
+    // The public /users?username= endpoint is unauthenticated and returns a list.
+    const res = await resilientFetch(
+      `https://gitlab.com/api/v4/users?username=${encodeURIComponent(username)}`,
+      { timeoutMs: 8000, retries: 1, cacheTtl: CACHE_TTL }
+    )
+    if (res.ok) {
+      const arr = (await res.json()) as Array<{
+        username: string
+        name: string
+        avatar_url: string
+        web_url: string
+        bio: string | null
+        created_at: string
+        followers: number
+        following: number
+      }>
+      const u = arr?.find((x) => x.username?.toLowerCase() === username.toLowerCase())
+      if (u) {
+        profile.found = true
+        profile.url = u.web_url
+        profile.avatar = u.avatar_url ?? null
+        profile.bio = u.bio ?? null
+        profile.followers = u.followers ?? 0
+        profile.following = u.following ?? 0
+        profile.joinedAt = u.created_at ?? null
+      }
     }
   } catch {
     /* ignore */
@@ -217,6 +311,8 @@ const probes = [
   probeMedium,
   probeKaggle,
   probeStackOverflow,
+  probeHackerNews,
+  probeGitLab,
 ]
 
 export async function search(input: ProbeInput): Promise<SocialProfile[]> {

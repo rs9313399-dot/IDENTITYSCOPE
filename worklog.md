@@ -100,3 +100,64 @@ The recurring `webDevReview` cron (every 15 min) should:
 - Run agent-browser QA on the `/` route (scan flow is the golden path)
 - Pick ONE of the priority recommendations above and implement it
 - Append a new `---` section to this worklog
+
+---
+Task ID: cron-1
+Agent: webDevReview (cron job 235654)
+Task: First recurring 15-min review — QA via agent-browser, fix bugs, add features & polish, then continue development.
+
+Work Log:
+- Read /home/z/my-project/worklog.md to understand Phase 1 completion state.
+- Checked dev.log — server healthy, no errors. Previous cron scans already in history.
+- Ran agent-browser QA on landing + dashboard; used VLM for critical visual review.
+- Identified QA opportunities: README quality artificially low, synthetic heatmap, missing hover states/tooltips, no quick-summary banner.
+- Selected 4 high-impact items from the priority list + 1 polish pass.
+
+Implemented changes:
+1. **Bug fix — GitHub README multi-variant fetching** (`src/lib/apis/github.ts`):
+   - `getReadmeContent()` now tries 14 filename variants: README.md, readme.md, Readme.md, README.MD, README.rst, readme.rst, README.txt, readme.txt, README, readme, README.markdown, readme.markdown, docs/README.md, doc/README.md.
+   - Each variant has a 6s timeout via AbortSignal.timeout.
+   - Verified: torvalds README quality 28→45, linux repo 0→58, GuitarPedal 0→90.
+2. **New feature — Real GitHub contribution calendar** (`src/lib/apis/github.ts` + `src/lib/types.ts`):
+   - Added `fetchContributionCalendar()` that parses GitHub's public `/users/USER/contributions` endpoint.
+   - Extracts per-day `data-date` + `data-level` (0-4) from `<td>` cells (new GitHub calendar format — no longer uses `rect`/`data-count`).
+   - Returns real `yearTotal` and `activeDays`. Falls back to synthetic heatmap on failure.
+   - Added `contributionYearTotal` and `contributionActiveDays` fields to `GitHubAnalysis` type.
+   - Dashboard now shows "X contributions · Y active days" stats with flame/calendar icons above the heatmap.
+   - Verified: torvalds → 3,256 contributions, 359 active days, 53 weeks (full real year).
+3. **New connectors — HackerNews + GitLab** (`src/lib/apis/social.ts`):
+   - `probeHackerNews()`: uses the public Algolia HN search API (`hn.algolia.com/api/v1/search?tags=author_USER`) — returns post count.
+   - `probeGitLab()`: uses GitLab's unauthenticated `/api/v4/users?username=` endpoint — returns avatar, bio, followers, joined date.
+   - Also rewrote `probeGitHubAsSocial()` to use the public profile HTML page (no rate limit) instead of the rate-limited REST API.
+   - Updated `/api/connectors` metadata (now 14 connectors).
+   - Added Flame + GitFork icons for the new platforms in the dashboard social section.
+   - Verified: dang → HN 53,920 posts; sindresorhus → GitLab found.
+4. **New feature — Quick Insights banner** (`src/components/identity/dashboard-view.tsx`):
+   - New `QuickInsights` component generates up to 6 color-coded insight cards (positive/warning/negative/info) from the report data.
+   - Signals include: follower milestones, star milestones, active-day streaks, low README quality, inactive projects, missing bio, top repo, website HTTPS/responsive/performance issues, email deliverability, overall score tier, social footprint breadth.
+   - Each card has a colored background + border matching its severity, with icon, title and detail.
+   - Renders between the score grid and the tabs section.
+5. **Polish — score card tooltips + top accent bars** (`src/components/identity/dashboard-view.tsx`):
+   - Each of the 9 score cards now has a thin colored top border bar matching its score color.
+   - Added hover tooltips (via shadcn Tooltip) showing the score label, value, and a plain-English description of what each dimension measures (from new `SCORE_DESCRIPTIONS` map).
+   - Wrapped the grid in `<TooltipProvider>`.
+
+Stage Summary:
+- All changes lint clean (`bun run lint` passes).
+- Dev server healthy on port 3000 (HTTP 200).
+- Verified end-to-end via agent-browser + VLM:
+  - Quick Insights banner renders with 5 color-coded cards (green followers/stars/active-days, red missing-bio, blue top-repo).
+  - Score cards have colored top bars + working hover tooltips.
+  - Contribution heatmap shows real "3,116 contributions · 344 active days" stats.
+  - Social Discovery tab shows all 9 platforms including Hacker News and GitLab.
+- Scores improved meaningfully from real data: torvalds documentation 38→56, consistency 82→95, overall 58→62.
+
+Unresolved / next-phase recommendations:
+1. **AI report streaming**: Gemini takes 10-16s; stream the response for better perceived performance.
+2. **Shareable read-only report route**: `/report/[id]` for sharing (currently single-page only).
+3. **More connectors**: Mastodon (instance-aware), Twitch, YouTube channel lookup, GitLab repo analysis (parallel to GitHub).
+4. **Compare mode winner badges**: highlight which side wins each metric.
+5. **Accessibility audit**: aria-labels on all icon-only buttons, keyboard nav verification.
+6. **Print/PDF polish**: verify SVG charts render correctly in print; consider a dedicated PDF generation route.
+7. **Performance**: lazy-load Recharts to reduce initial bundle.
+8. **Empty states + skeleton loaders**: the scan overlay is good, but individual tab sections could use skeletons while data loads.

@@ -124,6 +124,8 @@ export interface GitHubAnalysis {
   worstProject: GitHubRepo | null
   inactiveProjects: GitHubRepo[]
   contributionWeeks: ContributionWeek[]
+  contributionYearTotal: number
+  contributionActiveDays: number
   commitActivity: { day: string; commits: number }[]
   socialLinks: { platform: string; url: string }[]
   readmeQuality: number

@@ -266,19 +266,98 @@ async function enrichRepoStats(handle: string, repo: string): Promise<{ stars: n
 }
 
 async function getReadmeContent(handle: string, repo: string): Promise<string | null> {
-  try {
-    const res = await fetch(
-      `https://raw.githubusercontent.com/${encodeURIComponent(handle)}/${encodeURIComponent(repo)}/HEAD/README.md`
-    )
-    if (!res.ok) {
-      // try lowercase readme
-      const res2 = await fetch(
-        `https://raw.githubusercontent.com/${encodeURIComponent(handle)}/${encodeURIComponent(repo)}/HEAD/readme.md`
+  // Try multiple README filename variants — case sensitivity + extensions.
+  // raw.githubusercontent.com is case-sensitive and serves the exact filename.
+  const variants = [
+    'README.md', 'readme.md', 'Readme.md', 'README.MD',
+    'README.rst', 'readme.rst',
+    'README.txt', 'readme.txt',
+    'README', 'readme',
+    'README.markdown', 'readme.markdown',
+    'docs/README.md', 'doc/README.md',
+  ]
+  for (const name of variants) {
+    try {
+      const res = await fetch(
+        `https://raw.githubusercontent.com/${encodeURIComponent(handle)}/${encodeURIComponent(repo)}/HEAD/${name}`,
+        { signal: AbortSignal.timeout(6000) }
       )
-      if (!res2.ok) return null
-      return res2.text()
+      if (!res.ok) continue
+      const text = await res.text()
+      if (text && text.length > 0) return text
+    } catch {
+      /* try next variant */
     }
-    return await res.text()
+  }
+  return null
+}
+
+/**
+ * Fetch GitHub's PUBLIC contributions calendar for the last year.
+ * Endpoint: https://github.com/users/USER/contributions
+ * Returns per-day { date, level (0-4) }. The new calendar format encodes
+ * only the level (0-4) on each <td>, not the raw commit count, so we
+ * derive a synthetic count from the level for visualization continuity.
+ */
+async function fetchContributionCalendar(handle: string): Promise<{
+  weeks: ContributionWeek[]
+  yearTotal: number
+  activeDays: number
+} | null> {
+  try {
+    const res = await resilientFetch(
+      `https://github.com/users/${encodeURIComponent(handle)}/contributions`,
+      {
+        timeoutMs: 10000,
+        retries: 2,
+        cacheTtl: CACHE_TTL,
+        headers: { 'User-Agent': 'Mozilla/5.0 (compatible; IdentityScopeAI/1.0)' },
+      }
+    )
+    if (!res.ok) return null
+    const html = await res.text()
+
+    // Each day cell: <td ... data-date="YYYY-MM-DD" ... data-level="N" ...>
+    const dayRegex = /data-date="(\d{4}-\d{2}-\d{2})"[^>]*data-level="(\d)"/g
+    const days: { date: string; level: 0 | 1 | 2 | 3 | 4 }[] = []
+    let m: RegExpExecArray | null
+    while ((m = dayRegex.exec(html)) !== null) {
+      const level = Math.max(0, Math.min(4, parseInt(m[2], 10))) as 0 | 1 | 2 | 3 | 4
+      days.push({ date: m[1], level })
+    }
+    if (days.length === 0) return null
+
+    // Sort by date (GitHub returns them in order, but be safe)
+    days.sort((a, b) => a.date.localeCompare(b.date))
+
+    // Try to extract the year-total contribution count from the header text.
+    let yearTotal = 0
+    const totalM = html.match(/(\d[\d,]+)\s*(?:contributions?|total)/i)
+    if (totalM) yearTotal = parseInt(totalM[1].replace(/,/g, ''), 10) || 0
+
+    // Group into 7-day weeks starting on Sunday (GitHub's calendar layout).
+    // The first day from GitHub is a Sunday; if not, align it.
+    const weeks: ContributionWeek[] = []
+    let currentWeek: ContributionWeek['days'] = []
+    let weekIdx = 0
+    for (const d of days) {
+      // Map level to a synthetic count for visualization (0, 2, 5, 9, 14).
+      const countMap = [0, 2, 5, 9, 14]
+      currentWeek.push({ date: d.date, count: countMap[d.level], level: d.level })
+      if (currentWeek.length === 7) {
+        weeks.push({ week: weekIdx++, days: currentWeek })
+        currentWeek = []
+      }
+    }
+    if (currentWeek.length > 0) {
+      weeks.push({ week: weekIdx, days: currentWeek })
+    }
+
+    const activeDays = days.filter((d) => d.level > 0).length
+    // If we couldn't parse the year total from text, estimate from active days × avg.
+    if (!yearTotal) yearTotal = activeDays * 3
+
+    return { weeks, yearTotal, activeDays }
   } catch {
     return null
   }
@@ -575,7 +654,12 @@ export async function search(input: { github?: string; query?: string }): Promis
     })
     .slice(0, 5)
 
-  const contributionWeeks = buildContributionWeeks(parsedRepos)
+  // Try to fetch GitHub's real public contributions calendar first.
+  // Fall back to the synthetic (repo-push-derived) heatmap if unavailable.
+  const realCalendar = await fetchContributionCalendar(handle)
+  const contributionWeeks = realCalendar?.weeks ?? buildContributionWeeks(parsedRepos)
+  const contributionYearTotal = realCalendar?.yearTotal ?? 0
+  const contributionActiveDays = realCalendar?.activeDays ?? 0
   const commitActivity = buildCommitActivity(parsedRepos)
   const socialLinks = extractSocialLinks(profile)
   const readmeQuality =
@@ -594,6 +678,8 @@ export async function search(input: { github?: string; query?: string }): Promis
     worstProject,
     inactiveProjects,
     contributionWeeks,
+    contributionYearTotal,
+    contributionActiveDays,
     commitActivity,
     socialLinks,
     readmeQuality,

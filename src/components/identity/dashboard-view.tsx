@@ -34,6 +34,7 @@ import {
   Printer,
   RefreshCw,
   Brain,
+  Sparkles,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -66,6 +67,19 @@ const SCORE_META: { key: keyof ScoreSet; label: string; icon: React.ElementType 
   { key: 'community', label: 'Community', icon: Users },
   { key: 'brand', label: 'Brand', icon: Award },
 ]
+
+const SCORE_DESCRIPTIONS: Record<keyof ScoreSet, string> = {
+  developer: 'Composite of GitHub followers, repos, stars, account age & cross-platform presence.',
+  portfolio: 'Website performance, SEO, accessibility, HTTPS, responsiveness & tech stack.',
+  openSource: 'Public repos, forks (reusability), licensed projects, notable repos & contribution consistency.',
+  repository: 'Average health & quality score across the user\'s top repositories.',
+  documentation: 'README quality, completeness, presence of docs across repositories.',
+  consistency: 'Contribution frequency and trend stability over the last 12 months.',
+  security: 'Website HTTPS, security headers & email deliverability signals.',
+  community: 'Followers, stars, social reach and platform presence across the internet.',
+  brand: 'Profile completeness, bio, avatar, consistent handle & professional links.',
+  overall: 'Weighted combination of all nine dimensions.',
+}
 
 export function DashboardView() {
   const { currentReport: report, setView, setCurrentReport } = useAppStore()
@@ -190,23 +204,44 @@ export function DashboardView() {
       {/* Score grid */}
       <Reveal delay={0.1}>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
-          {SCORE_META.map((s) => {
-            const v = scores[s.key]
-            const color = scoreColor(v)
-            return (
-              <Card key={s.key} className="glass p-4 hover:glow transition-all">
-                <div className="flex items-center justify-between mb-2">
-                  <s.icon className="h-4 w-4" style={{ color }} />
-                  <span className="text-2xl font-bold tabular-nums" style={{ color }}>
-                    <AnimatedCounter value={v} />
-                  </span>
-                </div>
-                <div className="text-xs font-medium mb-1.5">{s.label}</div>
-                <Progress value={v} className="h-1.5" style={{ background: `${color}22` }} />
-              </Card>
-            )
-          })}
+          <TooltipProvider delayDuration={200}>
+            {SCORE_META.map((s) => {
+              const v = scores[s.key]
+              const color = scoreColor(v)
+              return (
+                <Tooltip key={s.key}>
+                  <TooltipTrigger asChild>
+                    <Card className="glass p-4 hover:glow transition-all cursor-default relative overflow-hidden">
+                      <div
+                        className="absolute inset-x-0 top-0 h-0.5"
+                        style={{ background: color, opacity: 0.7 }}
+                      />
+                      <div className="flex items-center justify-between mb-2">
+                        <s.icon className="h-4 w-4" style={{ color }} />
+                        <span className="text-2xl font-bold tabular-nums" style={{ color }}>
+                          <AnimatedCounter value={v} />
+                        </span>
+                      </div>
+                      <div className="text-xs font-medium mb-1.5">{s.label}</div>
+                      <Progress value={v} className="h-1.5" style={{ background: `${color}22` }} />
+                    </Card>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="max-w-[220px]">
+                    <div className="text-xs">
+                      <div className="font-semibold mb-0.5">{s.label} · {v}/100</div>
+                      <div className="text-muted-foreground">{SCORE_DESCRIPTIONS[s.key]}</div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              )
+            })}
+          </TooltipProvider>
         </div>
+      </Reveal>
+
+      {/* Quick insights banner */}
+      <Reveal delay={0.12}>
+        <QuickInsights report={report} />
       </Reveal>
 
       {/* Main content tabs */}
@@ -406,9 +441,29 @@ function GitHubSection({ g }: { g: NonNullable<DigitalIdentityReport['github']> 
 
       {/* Contribution heatmap */}
       <Card className="glass p-5">
-        <h4 className="text-sm font-semibold mb-4 flex items-center gap-2">
-          <Activity className="h-4 w-4 text-primary" /> Contribution activity (last 12 months)
-        </h4>
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <h4 className="text-sm font-semibold flex items-center gap-2">
+            <Activity className="h-4 w-4 text-primary" /> Contribution activity (last 12 months)
+          </h4>
+          {g.contributionYearTotal > 0 && (
+            <div className="flex items-center gap-3 text-xs">
+              <span className="flex items-center gap-1.5">
+                <Flame className="h-3.5 w-3.5 text-orange-500" />
+                <span className="font-bold tabular-nums">
+                  <AnimatedCounter value={g.contributionYearTotal} />
+                </span>
+                <span className="text-muted-foreground">contributions</span>
+              </span>
+              <span className="flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5 text-primary" />
+                <span className="font-bold tabular-nums">
+                  <AnimatedCounter value={g.contributionActiveDays} />
+                </span>
+                <span className="text-muted-foreground">active days</span>
+              </span>
+            </div>
+          )}
+        </div>
         <ContributionHeatmap weeks={g.contributionWeeks} />
         <div className="mt-4 pt-4 border-t border-border/40">
           <h5 className="text-xs font-medium text-muted-foreground mb-2">Commit activity trend</h5>
@@ -633,6 +688,8 @@ function SocialSection({
     Medium: BookOpen,
     Kaggle: Trophy,
     'Stack Overflow': Search,
+    'Hacker News': Flame,
+    GitLab: GitFork,
   }
   const foundCount = social.filter((s) => s.found).length
 
@@ -954,4 +1011,218 @@ function EmptyState({ icon: Icon, title, desc }: { icon: React.ElementType; titl
       <Button size="sm" onClick={() => setView('scanner')}>Run a new scan</Button>
     </Card>
   )
+}
+
+/* ----------------------------- Quick Insights ----------------------------- */
+
+interface Insight {
+  type: 'positive' | 'warning' | 'negative' | 'info'
+  icon: React.ElementType
+  title: string
+  detail: string
+}
+
+function QuickInsights({ report }: { report: DigitalIdentityReport }) {
+  const insights: Insight[] = []
+  const g = report.github
+  const w = report.website
+  const e = report.email
+  const s = report.scores
+
+  // GitHub insights
+  if (g) {
+    if (g.user.followers >= 1000) {
+      insights.push({
+        type: 'positive',
+        icon: Users,
+        title: `${formatCompact(g.user.followers)} GitHub followers`,
+        detail: 'Strong developer network reach.',
+      })
+    }
+    if (g.totalStars >= 100) {
+      insights.push({
+        type: 'positive',
+        icon: Star,
+        title: `${formatCompact(g.totalStars)} total stars`,
+        detail: 'Open-source work is being noticed.',
+      })
+    }
+    if (g.contributionActiveDays > 200) {
+      insights.push({
+        type: 'positive',
+        icon: Flame,
+        title: `${g.contributionActiveDays} active days this year`,
+        detail: 'Highly consistent contribution streak.',
+      })
+    }
+    if (g.readmeQuality < 40 && g.repos.length > 0) {
+      insights.push({
+        type: 'warning',
+        icon: BookOpen,
+        title: 'Low README quality',
+        detail: `Average ${g.readmeQuality}/100 — documentation needs work.`,
+      })
+    }
+    if (g.inactiveProjects.length > 2) {
+      insights.push({
+        type: 'warning',
+        icon: AlertTriangle,
+        title: `${g.inactiveProjects.length} inactive projects`,
+        detail: 'Repos untouched for over a year — archive or revive.',
+      })
+    }
+    if (!g.user.bio) {
+      insights.push({
+        type: 'negative',
+        icon: AlertTriangle,
+        title: 'Missing GitHub bio',
+        detail: 'Add a bio to strengthen personal branding.',
+      })
+    }
+    if (g.bestProject && g.bestProject.stars > 50) {
+      insights.push({
+        type: 'info',
+        icon: Trophy,
+        title: `Top repo: ${g.bestProject.name}`,
+        detail: `${formatCompact(g.bestProject.stars)} stars, score ${g.bestProject.score}/100.`,
+      })
+    }
+  }
+
+  // Website insights
+  if (w) {
+    if (!w.https) {
+      insights.push({
+        type: 'negative',
+        icon: ShieldX,
+        title: 'Website not on HTTPS',
+        detail: 'Security and SEO are both impacted.',
+      })
+    }
+    if (!w.responsive) {
+      insights.push({
+        type: 'negative',
+        icon: Smartphone,
+        title: 'Website not mobile-responsive',
+        detail: 'Poor mobile UX hurts SEO and accessibility.',
+      })
+    }
+    if (w.performance < 60) {
+      insights.push({
+        type: 'warning',
+        icon: Zap,
+        title: 'Website performance needs work',
+        detail: `Score ${w.performance}/100 — optimize assets & requests.`,
+      })
+    }
+    if (w.technologies.length >= 3) {
+      insights.push({
+        type: 'info',
+        icon: Code2,
+        title: `${w.technologies.length} technologies detected`,
+        detail: w.technologies.slice(0, 4).join(', '),
+      })
+    }
+  }
+
+  // Email insights
+  if (e && !e.valid) {
+    insights.push({
+      type: 'warning',
+      icon: Mail,
+      title: 'Email deliverability concerns',
+      detail: e.disposable ? 'Disposable domain.' : !e.mxRecord ? 'No MX records.' : 'Format issue.',
+    })
+  }
+
+  // Score-based insights
+  if (s.overall >= 75) {
+    insights.push({
+      type: 'positive',
+      icon: Award,
+      title: `Overall score ${s.overall}/100 — excellent`,
+      detail: 'Top-tier digital identity across all dimensions.',
+    })
+  } else if (s.overall < 35) {
+    insights.push({
+      type: 'negative',
+      icon: TrendingUp,
+      title: `Overall score ${s.overall}/100 — needs work`,
+      detail: 'Several dimensions need attention. See AI report for a roadmap.',
+    })
+  }
+
+  // Social reach
+  const foundSocial = report.social.filter((x) => x.found).length
+  if (foundSocial >= 5) {
+    insights.push({
+      type: 'positive',
+      icon: Users,
+      title: `Present on ${foundSocial} platforms`,
+      detail: 'Strong cross-platform identity consistency.',
+    })
+  } else if (foundSocial <= 1) {
+    insights.push({
+      type: 'warning',
+      icon: Users,
+      title: 'Limited social footprint',
+      detail: `Only ${foundSocial} platform(s) found — expand your presence.`,
+    })
+  }
+
+  if (insights.length === 0) {
+    return null
+  }
+
+  const styleMap = {
+    positive: { color: 'oklch(0.72 0.19 165)', bg: 'oklch(0.72 0.19 165 / 0.1)', border: 'oklch(0.72 0.19 165 / 0.3)' },
+    warning: { color: 'oklch(0.78 0.17 85)', bg: 'oklch(0.78 0.17 85 / 0.1)', border: 'oklch(0.78 0.17 85 / 0.3)' },
+    negative: { color: 'oklch(0.7 0.19 22)', bg: 'oklch(0.7 0.19 22 / 0.1)', border: 'oklch(0.7 0.19 22 / 0.3)' },
+    info: { color: 'oklch(0.72 0.19 265)', bg: 'oklch(0.72 0.19 265 / 0.1)', border: 'oklch(0.72 0.19 265 / 0.3)' },
+  }
+
+  // Limit to 6 most important
+  const display = insights.slice(0, 6)
+
+  return (
+    <Card className="glass-strong p-5 mb-6 relative overflow-hidden">
+      <div className="absolute inset-0 bg-dots opacity-20" />
+      <div className="relative">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="h-8 w-8 rounded-lg bg-primary/15 text-primary flex items-center justify-center">
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <h3 className="text-sm font-semibold">Quick insights</h3>
+          <Badge variant="outline" className="text-xs ml-auto">{insights.length} signals</Badge>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+          {display.map((ins, i) => {
+            const st = styleMap[ins.type]
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.06 }}
+                className="rounded-xl p-3 flex items-start gap-2.5"
+                style={{ background: st.bg, border: `1px solid ${st.border}` }}
+              >
+                <ins.icon className="h-4 w-4 shrink-0 mt-0.5" style={{ color: st.color }} />
+                <div className="min-w-0">
+                  <div className="text-xs font-semibold leading-tight">{ins.title}</div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">{ins.detail}</div>
+                </div>
+              </motion.div>
+            )
+          })}
+        </div>
+      </div>
+    </Card>
+  )
+}
+
+function formatCompact(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`
+  return String(n)
 }
