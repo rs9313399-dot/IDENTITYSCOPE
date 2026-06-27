@@ -14,6 +14,7 @@ import { SettingsView } from '@/components/identity/settings-view'
 import { AboutView } from '@/components/identity/about-view'
 import { useAppStore } from '@/stores/app-store'
 import { useKeyboardShortcuts, ShortcutsHelpDialog } from '@/hooks/use-keyboard-shortcuts'
+import { OnboardingTour } from '@/components/identity/onboarding-tour'
 
 export default function Home() {
   const view = useAppStore((s) => s.view)
@@ -45,6 +46,7 @@ export default function Home() {
       </main>
       <Footer />
       <ShortcutsHelpDialog open={showHelp} onClose={() => setShowHelp(false)} shortcuts={shortcuts} />
+      <OnboardingTour />
       {/* Keyboard hint badge */}
       <button
         onClick={() => setShowHelp(true)}

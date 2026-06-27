@@ -392,3 +392,57 @@ Unresolved / next-phase recommendations:
 5. **More connectors**: Twitch, YouTube channel lookup, GitLab repo analysis.
 6. **Real-time scan progress**: show per-connector progress during scan instead of a static overlay.
 7. **Report diffing**: compare two scans of the same user over time to show progress.
+
+---
+Task ID: cron-7
+Agent: webDevReview (cron job 235654)
+Task: Seventh recurring 15-min review — QA via agent-browser, continue styling polish + new features.
+
+Work Log:
+- Read /home/z/my-project/worklog.md — Phase 1 + cron-1/2/3/4/5/6 complete. Previous rounds: README fix, real contribution calendar, HN+GitLab+Mastodon connectors, Quick Insights, score tooltips, landing rewrite, compare winner badges, skeleton loaders, AI streaming overlay, enhanced empty states, keyboard shortcuts, progressive AI rendering, accessibility audit, lazy-load Recharts, share modal, Markdown/JSON export.
+- Checked dev.log — server healthy, no errors. Lint clean.
+- Ran agent-browser QA on landing — VLM confirmed solid, minor badge alignment note.
+- Selected 2 high-impact items: real-time scan progress (#6 priority), onboarding tour (#4 priority).
+
+Implemented changes:
+1. **New feature — Real-time scan progress** (`src/app/api/scan-stream/route.ts` + `src/hooks/use-scan.ts` + `src/components/identity/scanner-view.tsx`):
+   - New SSE endpoint `/api/scan-stream` that emits per-connector progress events:
+     - `{type:"start",connectors:[...]}` — lists all active connectors.
+     - `{type:"progress",connector,name,status,error}` — emitted as each connector completes.
+     - `{type:"done",report}` — full report when all connectors finish.
+   - Runs all connectors in parallel, emits progress as each resolves.
+   - Persists to DB and computes scores identically to `/api/scan`.
+   - New `useScanStream()` hook with `progress`, `activeConnectors`, `isPending` state.
+   - Redesigned scanning overlay to show:
+     - **Header**: animated scanner icon + query name.
+     - **Progress bar**: X/Y connectors + percentage, animated gradient fill.
+     - **Connector list**: each connector shows a spinner (running), green check (found), red X (error), or gray minus (not found) with status badges.
+     - **Footer**: privacy-first notice.
+   - Replaced the old static overlay (which showed fake timed steps).
+   - Verified: torvalds scan → overlay shows "4/5 connectors 80%" with Codeforces found, NPM found, PyPI not found, Social Discovery found, GitHub in progress → completes to dashboard.
+
+2. **New feature — Onboarding tour** (`src/components/identity/onboarding-tour.tsx` + `src/app/page.tsx`):
+   - 6-step guided tour shown on first visit (uses localStorage to track completion).
+   - Steps: Start a scan → Explore dashboard → Generate AI report → Compare identities → Track history → Privacy-first.
+   - Each step navigates to the relevant view, has an animated icon, title, description, step indicator, and Back/Next/Skip buttons.
+   - Spring-animated icon entrance, gradient background matching step color.
+   - "Get started" button on last step → navigates to scanner.
+   - Skip button → returns to landing.
+   - Verified: tour appears on first visit (after localStorage.clear()), shows 6 steps with navigation, can skip.
+
+Stage Summary:
+- All changes lint clean (`bun run lint` passes).
+- Dev server healthy on port 3000 (HTTP 200).
+- Verified end-to-end via agent-browser + VLM:
+  - Real-time scan: overlay shows "4/5 connectors 80%" progress bar, individual connector statuses (Codeforces found ✓, NPM found ✓, PyPI not found −, Social Discovery found ✓, GitHub spinner), completes to dashboard.
+  - Onboarding tour: 6-step modal with animated icons, step indicators, Back/Next/Skip buttons, navigates to scanner on completion.
+- The real-time scan progress transforms the scan UX — users see exactly which APIs are being queried and their results as they happen, instead of a static fake-progress overlay.
+
+Unresolved / next-phase recommendations:
+1. **Print/PDF polish**: verify SVG charts render correctly in print; dedicated PDF generation route.
+2. **Report diffing**: compare two scans of the same user over time to show progress (needs UI for selecting past scan + diff visualization).
+3. **Theme customization**: let users pick accent colors.
+4. **More connectors**: Twitch, YouTube channel lookup, GitLab repo analysis.
+5. **Compare history**: save compare results for re-viewing later.
+6. **Scan retry individual connectors**: let users retry a single failed connector without re-running the whole scan.
+7. **Custom connector builder**: UI for users to add their own public API connectors.

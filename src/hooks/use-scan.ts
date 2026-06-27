@@ -42,6 +42,93 @@ export function useScan() {
   })
 }
 
+export interface ScanProgressEvent {
+  connector: string
+  name: string
+  status: 'found' | 'not_found' | 'error' | 'skipped'
+  error?: string
+}
+
+/**
+ * Streaming scan hook — emits per-connector progress events.
+ * Returns { mutate, isPending, progress, activeConnectors, reset }.
+ */
+export function useScanStream() {
+  const { setCurrentReport, setView, setLastInput } = useAppStore()
+  const [isPending, setIsPending] = React.useState(false)
+  const [progress, setProgress] = React.useState<ScanProgressEvent[]>([])
+  const [activeConnectors, setActiveConnectors] = React.useState<string[]>([])
+
+  const mutate = React.useCallback(
+    async (input: ScanInput) => {
+      setIsPending(true)
+      setProgress([])
+      setActiveConnectors([])
+      setLastInput(input)
+
+      try {
+        const res = await fetch('/api/scan-stream', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(input),
+        })
+        if (!res.ok || !res.body) throw new Error('Scan stream failed')
+
+        const reader = res.body.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ''
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n')
+          buffer = lines.pop() ?? ''
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue
+            try {
+              const evt = JSON.parse(line.slice(6))
+              if (evt.type === 'start') {
+                setActiveConnectors(evt.connectors)
+              } else if (evt.type === 'progress') {
+                setProgress((prev) => [
+                  ...prev,
+                  {
+                    connector: evt.connector,
+                    name: evt.name,
+                    status: evt.status,
+                    error: evt.error,
+                  },
+                ])
+              } else if (evt.type === 'done') {
+                const report = evt.report as DigitalIdentityReport
+                setCurrentReport(report)
+                setView('dashboard')
+                toast.success(`Scan complete — overall score ${report.scores.overall}/100`)
+              }
+            } catch {
+              /* skip */
+            }
+          }
+        }
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Scan failed')
+      } finally {
+        setIsPending(false)
+      }
+    },
+    [setCurrentReport, setView, setLastInput]
+  )
+
+  const reset = React.useCallback(() => {
+    setProgress([])
+    setActiveConnectors([])
+    setIsPending(false)
+  }, [])
+
+  return { mutate, isPending, progress, activeConnectors, reset }
+}
+
 export function useAiReport() {
   return useMutation({
     mutationFn: (report: DigitalIdentityReport) =>

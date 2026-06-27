@@ -13,12 +13,15 @@ import {
   History,
   Shield,
   Zap,
+  CheckCircle2,
+  XCircle,
+  MinusCircle,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { useScan, useHistory } from '@/hooks/use-scan'
+import { useScanStream, useHistory } from '@/hooks/use-scan'
 import { useAppStore } from '@/stores/app-store'
 import { cn } from '@/lib/utils'
 import { Reveal } from '@/components/charts/animated'
@@ -39,7 +42,7 @@ export function ScannerView() {
   const [github, setGithub] = React.useState('')
   const [email, setEmail] = React.useState('')
   const [website, setWebsite] = React.useState('')
-  const scan = useScan()
+  const scan = useScanStream()
   const { data: historyData } = useHistory()
   const setView = useAppStore((s) => s.setView)
   const setLastInput = useAppStore((s) => s.setLastInput)
@@ -239,54 +242,115 @@ export function ScannerView() {
           </form>
         </Reveal>
 
-        {/* Scanning overlay */}
+        {/* Scanning overlay with real-time connector progress */}
         <AnimatePresence>
           {scan.isPending && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-background/85 backdrop-blur-md p-4"
             >
-              <div className="glass-strong rounded-3xl p-10 max-w-md w-full mx-4 text-center">
-                <div className="relative mx-auto h-16 w-16 mb-5">
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                    className="absolute inset-0 rounded-full border-2 border-primary/20 border-t-primary"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <ScanSearch className="h-6 w-6 text-primary" />
+              <motion.div
+                initial={{ scale: 0.95, y: 10 }}
+                animate={{ scale: 1, y: 0 }}
+                className="glass-strong rounded-3xl p-6 max-w-md w-full"
+              >
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="relative h-10 w-10 shrink-0">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                      className="absolute inset-0 rounded-full border-2 border-primary/20 border-t-primary"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <ScanSearch className="h-5 w-5 text-primary" />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-sm">Scanning digital identity…</h3>
+                    <p className="text-xs text-muted-foreground truncate">
+                      Querying public APIs for <span className="font-mono text-foreground">{query}</span>
+                    </p>
                   </div>
                 </div>
-                <h3 className="font-semibold text-lg mb-1">Scanning digital identity…</h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Querying public APIs for{' '}
-                  <span className="font-mono text-foreground">{query}</span>
-                </p>
-                <div className="space-y-1.5 text-left">
-                  {[
-                    'GitHub profile & repositories',
-                    'Social discovery across 7 platforms',
-                    'Package registries (NPM, PyPI)',
-                    'Codeforces competitive profile',
-                    'Website & portfolio analysis',
-                    'Email validation',
-                    'Computing 10-dimension scores',
-                  ].map((step, i) => (
-                    <motion.div
-                      key={step}
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.18 }}
-                      className="flex items-center gap-2 text-xs"
-                    >
-                      <Loader2 className="h-3 w-3 animate-spin text-primary" />
-                      <span className="text-muted-foreground">{step}</span>
-                    </motion.div>
-                  ))}
+
+                {/* Progress bar */}
+                {scan.activeConnectors.length > 0 && (
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1.5">
+                      <span>{scan.progress.length} / {scan.activeConnectors.length} connectors</span>
+                      <span className="tabular-nums">{Math.round((scan.progress.length / scan.activeConnectors.length) * 100)}%</span>
+                    </div>
+                    <div className="h-1 rounded-full bg-muted/40 overflow-hidden">
+                      <motion.div
+                        animate={{
+                          width: `${(scan.progress.length / scan.activeConnectors.length) * 100}%`,
+                        }}
+                        transition={{ duration: 0.3 }}
+                        className="h-full rounded-full bg-gradient-to-r from-primary to-[oklch(0.7_0.25_305)]"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Connector list */}
+                <div className="space-y-1.5 max-h-64 overflow-y-auto scrollbar-thin">
+                  {scan.activeConnectors.map((name) => {
+                    const evt = scan.progress.find((p) => p.name === name)
+                    const isDone = !!evt
+                    const isError = evt?.status === 'error'
+                    const isFound = evt?.status === 'found'
+                    const isNotFound = evt?.status === 'not_found'
+                    return (
+                      <motion.div
+                        key={name}
+                        initial={{ opacity: 0.4 }}
+                        animate={{ opacity: isDone ? 1 : 0.4 }}
+                        transition={{ duration: 0.3 }}
+                        className="flex items-center gap-2.5 text-xs py-1.5 px-2 rounded-lg hover:bg-accent/30"
+                      >
+                        {isDone ? (
+                          isFound ? (
+                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                          ) : isError ? (
+                            <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />
+                          ) : isNotFound ? (
+                            <MinusCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          ) : (
+                            <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                          )
+                        ) : (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-primary shrink-0" />
+                        )}
+                        <span className={isDone ? 'text-foreground font-medium' : 'text-muted-foreground'}>
+                          {name}
+                        </span>
+                        {isFound && (
+                          <Badge variant="secondary" className="text-[9px] ml-auto text-emerald-500 py-0">
+                            found
+                          </Badge>
+                        )}
+                        {isNotFound && (
+                          <span className="text-[10px] text-muted-foreground ml-auto">not found</span>
+                        )}
+                        {isError && evt?.error && (
+                          <span className="text-[10px] text-red-500 ml-auto truncate max-w-[100px]" title={evt.error}>
+                            error
+                          </span>
+                        )}
+                      </motion.div>
+                    )
+                  })}
                 </div>
-              </div>
+
+                {/* Footer */}
+                <div className="mt-4 pt-3 border-t border-border/40 flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground">
+                  <Shield className="h-3 w-3 text-emerald-500" />
+                  Only public APIs · No private data accessed
+                </div>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
