@@ -1,0 +1,800 @@
+     1→## Error Type
+     2→Console Error
+     3→
+     4→## Error Message
+     5→A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+     6→
+     7→- A server/client branch `if (typeof window !== 'undefined')`.
+     8→- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+     9→- Date formatting in a user's locale which doesn't match the server.
+    10→- External changing data without sending a snapshot of it along with the HTML.
+    11→- Invalid HTML tag nesting.
+    12→
+    13→It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+    14→
+    15→https://react.dev/link/hydration-mismatch
+    16→
+    17→  ...
+    18→    <InnerLayoutRouter url="/" tree={[...]} params={{}} cacheNode={{rsc:<Fragment>, ...}} segmentPath={[...]} ...>
+    19→      <SegmentViewNode type="page" pagePath="page.tsx">
+    20→        <SegmentTrieNode>
+    21→        <ClientPageRoot Component={function Home} serverProvidedParams={{...}}>
+    22→          <Home params={Promise} searchParams={Promise}>
+    23→            <div className="relative m...">
+    24→              <div>
+    25→              <Header>
+    26→                <header className="sticky top...">
+    27→                  <div>
+    28→                  <div className="mx-auto ma...">
+    29→                    <div className="flex h-14 ...">
+    30→                      <button onClick={function onClick} className="group flex..." aria-label="IdentitySc...">
+    31→                        <div className="h-9 w-9 bo...">
+    32→                          <ScanSearch className="h-5 w-5 te..." strokeWidth={2.5}>
+    33→                            <svg
+    34→                              ref={null}
+    35→                              xmlns="http://www.w3.org/2000/svg"
+    36→                              width={24}
+    37→                              height={24}
+    38→                              viewBox="0 0 24 24"
+    39→                              fill="none"
+    40→                              stroke="currentColor"
+    41→                              strokeWidth={2.5}
+    42→                              strokeLinecap="round"
+    43→                              strokeLinejoin="round"
+    44→                              className="lucide lucide-scan-search h-5 w-5 text-background"
+    45→                              aria-hidden="true"
+    46→-                             data-darkreader-inline-stroke=""
+    47→-                             style={{--darkreader-inline-stroke:"currentColor"}}
+    48→                            >
+    49→                        ...
+    50→                      <nav>
+    51→                      <div className="flex items...">
+    52→                        <a href="https://gi..." target="_blank" rel="noreferrer" className="hidden sm:..." ...>
+    53→                          <Github className="h-4 w-4" strokeWidth={2}>
+    54→                            <svg
+    55→                              ref={null}
+    56→                              xmlns="http://www.w3.org/2000/svg"
+    57→                              width={24}
+    58→                              height={24}
+    59→                              viewBox="0 0 24 24"
+    60→                              fill="none"
+    61→                              stroke="currentColor"
+    62→                              strokeWidth={2}
+    63→                              strokeLinecap="round"
+    64→                              strokeLinejoin="round"
+    65→                              className="lucide lucide-github h-4 w-4"
+    66→                              aria-hidden="true"
+    67→-                             data-darkreader-inline-stroke=""
+    68→-                             style={{--darkreader-inline-stroke:"currentColor"}}
+    69→                            >
+    70→                        <button onClick={function onClick} className="hidden sm:...">
+    71→                          <Shield className="h-3.5 w-3.5" strokeWidth={2.5}>
+    72→                            <svg
+    73→                              ref={null}
+    74→                              xmlns="http://www.w3.org/2000/svg"
+    75→                              width={24}
+    76→                              height={24}
+    77→                              viewBox="0 0 24 24"
+    78→                              fill="none"
+    79→                              stroke="currentColor"
+    80→                              strokeWidth={2.5}
+    81→                              strokeLinecap="round"
+    82→                              strokeLinejoin="round"
+    83→                              className="lucide lucide-shield h-3.5 w-3.5"
+    84→                              aria-hidden="true"
+    85→-                             data-darkreader-inline-stroke=""
+    86→-                             style={{--darkreader-inline-stroke:"currentColor"}}
+    87→                            >
+    88→                          ...
+    89→                        <button onClick={function onClick} className="lg:hidden ..." aria-label="Menu">
+    90→                          <Menu className="h-5 w-5">
+    91→                            <svg
+    92→                              ref={null}
+    93→                              xmlns="http://www.w3.org/2000/svg"
+    94→                              width={24}
+    95→                              height={24}
+    96→                              viewBox="0 0 24 24"
+    97→                              fill="none"
+    98→                              stroke="currentColor"
+    99→                              strokeWidth={2}
+   100→                              strokeLinecap="round"
+   101→                              strokeLinejoin="round"
+   102→                              className="lucide lucide-menu h-5 w-5"
+   103→                              aria-hidden="true"
+   104→-                             data-darkreader-inline-stroke=""
+   105→-                             style={{--darkreader-inline-stroke:"currentColor"}}
+   106→                            >
+   107→              ...
+   108→                <div style={{opacity:0, ...}} ref={function useMotionRef.useCallback}>
+   109→                  <LandingView>
+   110→                    <div className="relative">
+   111→                      <section className="relative b...">
+   112→                        <BgText>
+   113→                        <div className="relative m...">
+   114→                          <div className="grid lg:gr...">
+   115→                            <div>
+   116→                              ...
+   117→                                <span className="inline-fle...">
+   118→                                  <Lock className="h-3 w-3" strokeWidth={2.5}>
+   119→                                    <svg
+   120→                                      ref={null}
+   121→                                      xmlns="http://www.w3.org/2000/svg"
+   122→                                      width={24}
+   123→                                      height={24}
+   124→                                      viewBox="0 0 24 24"
+   125→                                      fill="none"
+   126→                                      stroke="currentColor"
+   127→                                      strokeWidth={2.5}
+   128→                                      strokeLinecap="round"
+   129→                                      strokeLinejoin="round"
+   130→                                      className="lucide lucide-lock h-3 w-3"
+   131→                                      aria-hidden="true"
+   132→-                                     data-darkreader-inline-stroke=""
+   133→-                                     style={{--darkreader-inline-stroke:"currentColor"}}
+   134→                                    >
+   135→                                  ...
+   136→                              <motion.h1>
+   137→                              <motion.p>
+   138→                              ...
+   139→                                <div className="mt-8 flex ..." style={{opacity:0, ...}} ...>
+   140→                                  <Button size="lg" onClick={function onClick} className="h-14 px-8 ...">
+   141→                                    <button data-slot="button" className={"inline-f..."} onClick={function onClick}>
+   142→                                      <Zap className="h-4 w-4 mr..." strokeWidth={2.5}>
+   143→                                        <svg
+   144→                                          ref={null}
+   145→                                          xmlns="http://www.w3.org/2000/svg"
+   146→                                          width={24}
+   147→                                          height={24}
+   148→                                          viewBox="0 0 24 24"
+   149→                                          fill="none"
+   150→                                          stroke="currentColor"
+   151→                                          strokeWidth={2.5}
+   152→                                          strokeLinecap="round"
+   153→                                          strokeLinejoin="round"
+   154→                                          className="lucide lucide-zap h-4 w-4 mr-2.5"
+   155→                                          aria-hidden="true"
+   156→-                                         data-darkreader-inline-stroke=""
+   157→-                                         style={{--darkreader-inline-stroke:"currentColor"}}
+   158→                                        >
+   159→                                      <ArrowRight className="h-4 w-4 ml..." strokeWidth={2.5}>
+   160→                                        <svg
+   161→                                          ref={null}
+   162→                                          xmlns="http://www.w3.org/2000/svg"
+   163→                                          width={24}
+   164→                                          height={24}
+   165→                                          viewBox="0 0 24 24"
+   166→                                          fill="none"
+   167→                                          stroke="currentColor"
+   168→                                          strokeWidth={2.5}
+   169→                                          strokeLinecap="round"
+   170→                                          strokeLinejoin="round"
+   171→                                          className="lucide lucide-arrow-right h-4 w-4 ml-2 transition-transform group..."
+   172→                                          aria-hidden="true"
+   173→-                                         data-darkreader-inline-stroke=""
+   174→-                                         style={{--darkreader-inline-stroke:"currentColor"}}
+   175→                                        >
+   176→                                  <Button size="lg" variant="outline" onClick={function onClick} ...>
+   177→                                    <button data-slot="button" className={"inline-f..."} onClick={function onClick}>
+   178→                                      <Eye className="h-4 w-4 mr-2" strokeWidth={2.5}>
+   179→                                        <svg
+   180→                                          ref={null}
+   181→                                          xmlns="http://www.w3.org/2000/svg"
+   182→                                          width={24}
+   183→                                          height={24}
+   184→                                          viewBox="0 0 24 24"
+   185→                                          fill="none"
+   186→                                          stroke="currentColor"
+   187→                                          strokeWidth={2.5}
+   188→                                          strokeLinecap="round"
+   189→                                          strokeLinejoin="round"
+   190→                                          className="lucide lucide-eye h-4 w-4 mr-2"
+   191→                                          aria-hidden="true"
+   192→-                                         data-darkreader-inline-stroke=""
+   193→-                                         style={{--darkreader-inline-stroke:"currentColor"}}
+   194→                                        >
+   195→                                      ...
+   196→                            ...
+   197→                          <div className="mt-16 grid...">
+   198→                            ...
+   199→                              <div className="p-5 border..." style={{...}}>
+   200→                                <CodeXml className="h-5 w-5 mb..." strokeWidth={2}>
+   201→                                  <svg
+   202→                                    ref={null}
+   203→                                    xmlns="http://www.w3.org/2000/svg"
+   204→                                    width={24}
+   205→                                    height={24}
+   206→                                    viewBox="0 0 24 24"
+   207→                                    fill="none"
+   208→                                    stroke="currentColor"
+   209→                                    strokeWidth={2}
+   210→                                    strokeLinecap="round"
+   211→                                    strokeLinejoin="round"
+   212→                                    className="lucide lucide-code-xml h-5 w-5 mb-3 text-accent"
+   213→                                    aria-hidden="true"
+   214→-                                   data-darkreader-inline-stroke=""
+   215→-                                   style={{--darkreader-inline-stroke:"currentColor"}}
+   216→                                  >
+   217→                                ...
+   218→                            ...
+   219→                              <div className="p-5 border..." style={{...}}>
+   220→                                <Users className="h-5 w-5 mb..." strokeWidth={2}>
+   221→                                  <svg
+   222→                                    ref={null}
+   223→                                    xmlns="http://www.w3.org/2000/svg"
+   224→                                    width={24}
+   225→                                    height={24}
+   226→                                    viewBox="0 0 24 24"
+   227→                                    fill="none"
+   228→                                    stroke="currentColor"
+   229→                                    strokeWidth={2}
+   230→                                    strokeLinecap="round"
+   231→                                    strokeLinejoin="round"
+   232→                                    className="lucide lucide-users h-5 w-5 mb-3 text-accent"
+   233→                                    aria-hidden="true"
+   234→-                                   data-darkreader-inline-stroke=""
+   235→-                                   style={{--darkreader-inline-stroke:"currentColor"}}
+   236→                                  >
+   237→                                ...
+   238→                            ...
+   239→                              <div className="p-5 border..." style={{...}}>
+   240→                                <ChartColumn className="h-5 w-5 mb..." strokeWidth={2}>
+   241→                                  <svg
+   242→                                    ref={null}
+   243→                                    xmlns="http://www.w3.org/2000/svg"
+   244→                                    width={24}
+   245→                                    height={24}
+   246→                                    viewBox="0 0 24 24"
+   247→                                    fill="none"
+   248→                                    stroke="currentColor"
+   249→                                    strokeWidth={2}
+   250→                                    strokeLinecap="round"
+   251→                                    strokeLinejoin="round"
+   252→                                    className="lucide lucide-chart-column h-5 w-5 mb-3 text-accent"
+   253→                                    aria-hidden="true"
+   254→-                                   data-darkreader-inline-stroke=""
+   255→-                                   style={{--darkreader-inline-stroke:"currentColor"}}
+   256→                                  >
+   257→                                ...
+   258→                            ...
+   259→                              <div className="p-5 border..." style={{...}}>
+   260→                                <Shield className="h-5 w-5 mb..." strokeWidth={2}>
+   261→                                  <svg
+   262→                                    ref={null}
+   263→                                    xmlns="http://www.w3.org/2000/svg"
+   264→                                    width={24}
+   265→                                    height={24}
+   266→                                    viewBox="0 0 24 24"
+   267→                                    fill="none"
+   268→                                    stroke="currentColor"
+   269→                                    strokeWidth={2}
+   270→                                    strokeLinecap="round"
+   271→                                    strokeLinejoin="round"
+   272→                                    className="lucide lucide-shield h-5 w-5 mb-3 text-accent"
+   273→                                    aria-hidden="true"
+   274→-                                   data-darkreader-inline-stroke=""
+   275→-                                   style={{--darkreader-inline-stroke:"currentColor"}}
+   276→                                  >
+   277→                                ...
+   278→                      <section className="mx-auto ma...">
+   279→                        <Reveal>
+   280→                        <div className="grid grid-...">
+   281→                          ...
+   282→                            <button onClick={function onClick} className="group w-fu..." style={{...}}>
+   283→                              <Github className="h-6 w-6 mb-3" strokeWidth={2}>
+   284→                                <svg
+   285→                                  ref={null}
+   286→                                  xmlns="http://www.w3.org/2000/svg"
+   287→                                  width={24}
+   288→                                  height={24}
+   289→                                  viewBox="0 0 24 24"
+   290→                                  fill="none"
+   291→                                  stroke="currentColor"
+   292→                                  strokeWidth={2}
+   293→                                  strokeLinecap="round"
+   294→                                  strokeLinejoin="round"
+   295→                                  className="lucide lucide-github h-6 w-6 mb-3"
+   296→                                  aria-hidden="true"
+   297→-                                 data-darkreader-inline-stroke=""
+   298→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   299→                                >
+   300→                              ...
+   301→                          ...
+   302→                            <button onClick={function onClick} className="group w-fu..." style={{...}}>
+   303→                              <Globe className="h-6 w-6 mb-3" strokeWidth={2}>
+   304→                                <svg
+   305→                                  ref={null}
+   306→                                  xmlns="http://www.w3.org/2000/svg"
+   307→                                  width={24}
+   308→                                  height={24}
+   309→                                  viewBox="0 0 24 24"
+   310→                                  fill="none"
+   311→                                  stroke="currentColor"
+   312→                                  strokeWidth={2}
+   313→                                  strokeLinecap="round"
+   314→                                  strokeLinejoin="round"
+   315→                                  className="lucide lucide-globe h-6 w-6 mb-3"
+   316→                                  aria-hidden="true"
+   317→-                                 data-darkreader-inline-stroke=""
+   318→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   319→                                >
+   320→                              ...
+   321→                          ...
+   322→                            <button onClick={function onClick} className="group w-fu..." style={{...}}>
+   323→                              <Mail className="h-6 w-6 mb-3" strokeWidth={2}>
+   324→                                <svg
+   325→                                  ref={null}
+   326→                                  xmlns="http://www.w3.org/2000/svg"
+   327→                                  width={24}
+   328→                                  height={24}
+   329→                                  viewBox="0 0 24 24"
+   330→                                  fill="none"
+   331→                                  stroke="currentColor"
+   332→                                  strokeWidth={2}
+   333→                                  strokeLinecap="round"
+   334→                                  strokeLinejoin="round"
+   335→                                  className="lucide lucide-mail h-6 w-6 mb-3"
+   336→                                  aria-hidden="true"
+   337→-                                 data-darkreader-inline-stroke=""
+   338→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   339→                                >
+   340→                              ...
+   341→                          ...
+   342→                            <button onClick={function onClick} className="group w-fu..." style={{...}}>
+   343→                              <ScanSearch className="h-6 w-6 mb-3" strokeWidth={2}>
+   344→                                <svg
+   345→                                  ref={null}
+   346→                                  xmlns="http://www.w3.org/2000/svg"
+   347→                                  width={24}
+   348→                                  height={24}
+   349→                                  viewBox="0 0 24 24"
+   350→                                  fill="none"
+   351→                                  stroke="currentColor"
+   352→                                  strokeWidth={2}
+   353→                                  strokeLinecap="round"
+   354→                                  strokeLinejoin="round"
+   355→                                  className="lucide lucide-scan-search h-6 w-6 mb-3"
+   356→                                  aria-hidden="true"
+   357→-                                 data-darkreader-inline-stroke=""
+   358→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   359→                                >
+   360→                              ...
+   361→                      <section className="mx-auto ma...">
+   362→                        <Reveal>
+   363→                        <div className="grid grid-...">
+   364→                          ...
+   365→                            <div className="relative">
+   366→                              <ScanSearch className="h-7 w-7 mb..." strokeWidth={2}>
+   367→                                <svg
+   368→                                  ref={null}
+   369→                                  xmlns="http://www.w3.org/2000/svg"
+   370→                                  width={24}
+   371→                                  height={24}
+   372→                                  viewBox="0 0 24 24"
+   373→                                  fill="none"
+   374→                                  stroke="currentColor"
+   375→                                  strokeWidth={2}
+   376→                                  strokeLinecap="round"
+   377→                                  strokeLinejoin="round"
+   378→                                  className="lucide lucide-scan-search h-7 w-7 mb-3 text-accent"
+   379→                                  aria-hidden="true"
+   380→-                                 data-darkreader-inline-stroke=""
+   381→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   382→                                >
+   383→                              ...
+   384→                          ...
+   385→                            <div className="relative">
+   386→                              <Zap className="h-7 w-7 mb..." strokeWidth={2}>
+   387→                                <svg
+   388→                                  ref={null}
+   389→                                  xmlns="http://www.w3.org/2000/svg"
+   390→                                  width={24}
+   391→                                  height={24}
+   392→                                  viewBox="0 0 24 24"
+   393→                                  fill="none"
+   394→                                  stroke="currentColor"
+   395→                                  strokeWidth={2}
+   396→                                  strokeLinecap="round"
+   397→                                  strokeLinejoin="round"
+   398→                                  className="lucide lucide-zap h-7 w-7 mb-3 text-accent"
+   399→                                  aria-hidden="true"
+   400→-                                 data-darkreader-inline-stroke=""
+   401→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   402→                                >
+   403→                              ...
+   404→                          ...
+   405→                            <div className="relative">
+   406→                              <ChartColumn className="h-7 w-7 mb..." strokeWidth={2}>
+   407→                                <svg
+   408→                                  ref={null}
+   409→                                  xmlns="http://www.w3.org/2000/svg"
+   410→                                  width={24}
+   411→                                  height={24}
+   412→                                  viewBox="0 0 24 24"
+   413→                                  fill="none"
+   414→                                  stroke="currentColor"
+   415→                                  strokeWidth={2}
+   416→                                  strokeLinecap="round"
+   417→                                  strokeLinejoin="round"
+   418→                                  className="lucide lucide-chart-column h-7 w-7 mb-3 text-accent"
+   419→                                  aria-hidden="true"
+   420→-                                 data-darkreader-inline-stroke=""
+   421→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   422→                                >
+   423→                              ...
+   424→                          ...
+   425→                            <div className="relative">
+   426→                              <Brain className="h-7 w-7 mb..." strokeWidth={2}>
+   427→                                <svg
+   428→                                  ref={null}
+   429→                                  xmlns="http://www.w3.org/2000/svg"
+   430→                                  width={24}
+   431→                                  height={24}
+   432→                                  viewBox="0 0 24 24"
+   433→                                  fill="none"
+   434→                                  stroke="currentColor"
+   435→                                  strokeWidth={2}
+   436→                                  strokeLinecap="round"
+   437→                                  strokeLinejoin="round"
+   438→                                  className="lucide lucide-brain h-7 w-7 mb-3 text-accent"
+   439→                                  aria-hidden="true"
+   440→-                                 data-darkreader-inline-stroke=""
+   441→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   442→                                >
+   443→                              ...
+   444→                      <section className="mx-auto ma...">
+   445→                        <Reveal>
+   446→                        <div className="grid grid-...">
+   447→                          ...
+   448→                            <div className="p-5 border..." style={{...}}>
+   449→                              <Github className="h-6 w-6 mb..." strokeWidth={2}>
+   450→                                <svg
+   451→                                  ref={null}
+   452→                                  xmlns="http://www.w3.org/2000/svg"
+   453→                                  width={24}
+   454→                                  height={24}
+   455→                                  viewBox="0 0 24 24"
+   456→                                  fill="none"
+   457→                                  stroke="currentColor"
+   458→                                  strokeWidth={2}
+   459→                                  strokeLinecap="round"
+   460→                                  strokeLinejoin="round"
+   461→                                  className="lucide lucide-github h-6 w-6 mb-3 group-hover:text-background text-accent"
+   462→                                  aria-hidden="true"
+   463→-                                 data-darkreader-inline-stroke=""
+   464→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   465→                                >
+   466→                              ...
+   467→                          ...
+   468→                            <div className="p-5 border..." style={{...}}>
+   469→                              <Globe className="h-6 w-6 mb..." strokeWidth={2}>
+   470→                                <svg
+   471→                                  ref={null}
+   472→                                  xmlns="http://www.w3.org/2000/svg"
+   473→                                  width={24}
+   474→                                  height={24}
+   475→                                  viewBox="0 0 24 24"
+   476→                                  fill="none"
+   477→                                  stroke="currentColor"
+   478→                                  strokeWidth={2}
+   479→                                  strokeLinecap="round"
+   480→                                  strokeLinejoin="round"
+   481→                                  className="lucide lucide-globe h-6 w-6 mb-3 group-hover:text-background text-accent"
+   482→                                  aria-hidden="true"
+   483→-                                 data-darkreader-inline-stroke=""
+   484→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   485→                                >
+   486→                              ...
+   487→                          ...
+   488→                            <div className="p-5 border..." style={{...}}>
+   489→                              <Mail className="h-6 w-6 mb..." strokeWidth={2}>
+   490→                                <svg
+   491→                                  ref={null}
+   492→                                  xmlns="http://www.w3.org/2000/svg"
+   493→                                  width={24}
+   494→                                  height={24}
+   495→                                  viewBox="0 0 24 24"
+   496→                                  fill="none"
+   497→                                  stroke="currentColor"
+   498→                                  strokeWidth={2}
+   499→                                  strokeLinecap="round"
+   500→                                  strokeLinejoin="round"
+   501→                                  className="lucide lucide-mail h-6 w-6 mb-3 group-hover:text-background text-accent"
+   502→                                  aria-hidden="true"
+   503→-                                 data-darkreader-inline-stroke=""
+   504→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   505→                                >
+   506→                              ...
+   507→                          ...
+   508→                            <div className="p-5 border..." style={{...}}>
+   509→                              <Users className="h-6 w-6 mb..." strokeWidth={2}>
+   510→                                <svg
+   511→                                  ref={null}
+   512→                                  xmlns="http://www.w3.org/2000/svg"
+   513→                                  width={24}
+   514→                                  height={24}
+   515→                                  viewBox="0 0 24 24"
+   516→                                  fill="none"
+   517→                                  stroke="currentColor"
+   518→                                  strokeWidth={2}
+   519→                                  strokeLinecap="round"
+   520→                                  strokeLinejoin="round"
+   521→                                  className="lucide lucide-users h-6 w-6 mb-3 group-hover:text-background text-accent"
+   522→                                  aria-hidden="true"
+   523→-                                 data-darkreader-inline-stroke=""
+   524→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   525→                                >
+   526→                              ...
+   527→                          ...
+   528→                            <div className="p-5 border..." style={{...}}>
+   529→                              <Brain className="h-6 w-6 mb..." strokeWidth={2}>
+   530→                                <svg
+   531→                                  ref={null}
+   532→                                  xmlns="http://www.w3.org/2000/svg"
+   533→                                  width={24}
+   534→                                  height={24}
+   535→                                  viewBox="0 0 24 24"
+   536→                                  fill="none"
+   537→                                  stroke="currentColor"
+   538→                                  strokeWidth={2}
+   539→                                  strokeLinecap="round"
+   540→                                  strokeLinejoin="round"
+   541→                                  className="lucide lucide-brain h-6 w-6 mb-3 group-hover:text-background text-accent"
+   542→                                  aria-hidden="true"
+   543→-                                 data-darkreader-inline-stroke=""
+   544→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   545→                                >
+   546→                              ...
+   547→                          ...
+   548→                            <div className="p-5 border..." style={{...}}>
+   549→                              <GitCompareArrows className="h-6 w-6 mb..." strokeWidth={2}>
+   550→                                <svg
+   551→                                  ref={null}
+   552→                                  xmlns="http://www.w3.org/2000/svg"
+   553→                                  width={24}
+   554→                                  height={24}
+   555→                                  viewBox="0 0 24 24"
+   556→                                  fill="none"
+   557→                                  stroke="currentColor"
+   558→                                  strokeWidth={2}
+   559→                                  strokeLinecap="round"
+   560→                                  strokeLinejoin="round"
+   561→                                  className="lucide lucide-git-compare-arrows h-6 w-6 mb-3 group-hover:text-background..."
+   562→                                  aria-hidden="true"
+   563→-                                 data-darkreader-inline-stroke=""
+   564→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   565→                                >
+   566→                              ...
+   567→                          ...
+   568→                            <div className="p-5 border..." style={{...}}>
+   569→                              <ChartColumn className="h-6 w-6 mb..." strokeWidth={2}>
+   570→                                <svg
+   571→                                  ref={null}
+   572→                                  xmlns="http://www.w3.org/2000/svg"
+   573→                                  width={24}
+   574→                                  height={24}
+   575→                                  viewBox="0 0 24 24"
+   576→                                  fill="none"
+   577→                                  stroke="currentColor"
+   578→                                  strokeWidth={2}
+   579→                                  strokeLinecap="round"
+   580→                                  strokeLinejoin="round"
+   581→                                  className="lucide lucide-chart-column h-6 w-6 mb-3 group-hover:text-background text-..."
+   582→                                  aria-hidden="true"
+   583→-                                 data-darkreader-inline-stroke=""
+   584→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   585→                                >
+   586→                              ...
+   587→                          ...
+   588→                            <div className="p-5 border..." style={{...}}>
+   589→                              <FileDown className="h-6 w-6 mb..." strokeWidth={2}>
+   590→                                <svg
+   591→                                  ref={null}
+   592→                                  xmlns="http://www.w3.org/2000/svg"
+   593→                                  width={24}
+   594→                                  height={24}
+   595→                                  viewBox="0 0 24 24"
+   596→                                  fill="none"
+   597→                                  stroke="currentColor"
+   598→                                  strokeWidth={2}
+   599→                                  strokeLinecap="round"
+   600→                                  strokeLinejoin="round"
+   601→                                  className="lucide lucide-file-down h-6 w-6 mb-3 group-hover:text-background text-accent"
+   602→                                  aria-hidden="true"
+   603→-                                 data-darkreader-inline-stroke=""
+   604→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   605→                                >
+   606→                              ...
+   607→                      ...
+   608→                        <div className="p-8 sm:p-1...">
+   609→                          <span>
+   610→                          <h2>
+   611→                          <p>
+   612→                          <div className="flex flex-...">
+   613→                            <div className="flex items...">
+   614→                              <Trophy className="h-4 w-4 sh..." strokeWidth={2}>
+   615→                                <svg
+   616→                                  ref={null}
+   617→                                  xmlns="http://www.w3.org/2000/svg"
+   618→                                  width={24}
+   619→                                  height={24}
+   620→                                  viewBox="0 0 24 24"
+   621→                                  fill="none"
+   622→                                  stroke="currentColor"
+   623→                                  strokeWidth={2}
+   624→                                  strokeLinecap="round"
+   625→                                  strokeLinejoin="round"
+   626→                                  className="lucide lucide-trophy h-4 w-4 shrink-0 text-accent"
+   627→                                  aria-hidden="true"
+   628→-                                 data-darkreader-inline-stroke=""
+   629→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   630→                                >
+   631→                              ...
+   632→                            <div className="flex items...">
+   633→                              <Activity className="h-4 w-4 sh..." strokeWidth={2}>
+   634→                                <svg
+   635→                                  ref={null}
+   636→                                  xmlns="http://www.w3.org/2000/svg"
+   637→                                  width={24}
+   638→                                  height={24}
+   639→                                  viewBox="0 0 24 24"
+   640→                                  fill="none"
+   641→                                  stroke="currentColor"
+   642→                                  strokeWidth={2}
+   643→                                  strokeLinecap="round"
+   644→                                  strokeLinejoin="round"
+   645→                                  className="lucide lucide-activity h-4 w-4 shrink-0 text-accent"
+   646→                                  aria-hidden="true"
+   647→-                                 data-darkreader-inline-stroke=""
+   648→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   649→                                >
+   650→                              ...
+   651→                            <div className="flex items...">
+   652→                              <Shield className="h-4 w-4 sh..." strokeWidth={2}>
+   653→                                <svg
+   654→                                  ref={null}
+   655→                                  xmlns="http://www.w3.org/2000/svg"
+   656→                                  width={24}
+   657→                                  height={24}
+   658→                                  viewBox="0 0 24 24"
+   659→                                  fill="none"
+   660→                                  stroke="currentColor"
+   661→                                  strokeWidth={2}
+   662→                                  strokeLinecap="round"
+   663→                                  strokeLinejoin="round"
+   664→                                  className="lucide lucide-shield h-4 w-4 shrink-0 text-accent"
+   665→                                  aria-hidden="true"
+   666→-                                 data-darkreader-inline-stroke=""
+   667→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   668→                                >
+   669→                              ...
+   670→                          <Button onClick={function onClick} className="mt-6 borde...">
+   671→                            <button data-slot="button" className={"inline-f..."} onClick={function onClick}>
+   672→                              <ArrowRight className="h-4 w-4 ml-2" strokeWidth={2.5}>
+   673→                                <svg
+   674→                                  ref={null}
+   675→                                  xmlns="http://www.w3.org/2000/svg"
+   676→                                  width={24}
+   677→                                  height={24}
+   678→                                  viewBox="0 0 24 24"
+   679→                                  fill="none"
+   680→                                  stroke="currentColor"
+   681→                                  strokeWidth={2.5}
+   682→                                  strokeLinecap="round"
+   683→                                  strokeLinejoin="round"
+   684→                                  className="lucide lucide-arrow-right h-4 w-4 ml-2"
+   685→                                  aria-hidden="true"
+   686→-                                 data-darkreader-inline-stroke=""
+   687→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   688→                                >
+   689→                      <section className="mx-auto ma...">
+   690→                        <div className="grid grid-...">
+   691→                          <div className="flex items..." style={{...}}>
+   692→                            <Lock className="h-5 w-5 sh..." strokeWidth={2}>
+   693→                              <svg
+   694→                                ref={null}
+   695→                                xmlns="http://www.w3.org/2000/svg"
+   696→                                width={24}
+   697→                                height={24}
+   698→                                viewBox="0 0 24 24"
+   699→                                fill="none"
+   700→                                stroke="currentColor"
+   701→                                strokeWidth={2}
+   702→                                strokeLinecap="round"
+   703→                                strokeLinejoin="round"
+   704→                                className="lucide lucide-lock h-5 w-5 shrink-0 mt-0.5 text-accent"
+   705→                                aria-hidden="true"
+   706→-                               data-darkreader-inline-stroke=""
+   707→-                               style={{--darkreader-inline-stroke:"currentColor"}}
+   708→                              >
+   709→                            ...
+   710→                          <div className="flex items..." style={{...}}>
+   711→                            <Shield className="h-5 w-5 sh..." strokeWidth={2}>
+   712→                              <svg
+   713→                                ref={null}
+   714→                                xmlns="http://www.w3.org/2000/svg"
+   715→                                width={24}
+   716→                                height={24}
+   717→                                viewBox="0 0 24 24"
+   718→                                fill="none"
+   719→                                stroke="currentColor"
+   720→                                strokeWidth={2}
+   721→                                strokeLinecap="round"
+   722→                                strokeLinejoin="round"
+   723→                                className="lucide lucide-shield h-5 w-5 shrink-0 mt-0.5 text-accent"
+   724→                                aria-hidden="true"
+   725→-                               data-darkreader-inline-stroke=""
+   726→-                               style={{--darkreader-inline-stroke:"currentColor"}}
+   727→                              >
+   728→                            ...
+   729→                          <div className="flex items..." style={{...}}>
+   730→                            <CircleCheck className="h-5 w-5 sh..." strokeWidth={2}>
+   731→                              <svg
+   732→                                ref={null}
+   733→                                xmlns="http://www.w3.org/2000/svg"
+   734→                                width={24}
+   735→                                height={24}
+   736→                                viewBox="0 0 24 24"
+   737→                                fill="none"
+   738→                                stroke="currentColor"
+   739→                                strokeWidth={2}
+   740→                                strokeLinecap="round"
+   741→                                strokeLinejoin="round"
+   742→                                className="lucide lucide-circle-check h-5 w-5 shrink-0 mt-0.5 text-accent"
+   743→                                aria-hidden="true"
+   744→-                               data-darkreader-inline-stroke=""
+   745→-                               style={{--darkreader-inline-stroke:"currentColor"}}
+   746→                              >
+   747→                            ...
+   748→                      ...
+   749→                        <div className={undefined} style={{opacity:0, ...}} ref={function useMotionRef.useCallback}>
+   750→                          <div className="border-[3p...">
+   751→                            <BgText>
+   752→                            <div className="relative">
+   753→                              <Terminal className="h-10 w-10 ..." strokeWidth={2}>
+   754→                                <svg
+   755→                                  ref={null}
+   756→                                  xmlns="http://www.w3.org/2000/svg"
+   757→                                  width={24}
+   758→                                  height={24}
+   759→                                  viewBox="0 0 24 24"
+   760→                                  fill="none"
+   761→                                  stroke="currentColor"
+   762→                                  strokeWidth={2}
+   763→                                  strokeLinecap="round"
+   764→                                  strokeLinejoin="round"
+   765→                                  className="lucide lucide-terminal h-10 w-10 mx-auto mb-4 text-accent"
+   766→                                  aria-hidden="true"
+   767→-                                 data-darkreader-inline-stroke=""
+   768→-                                 style={{--darkreader-inline-stroke:"currentColor"}}
+   769→                                >
+   770→                              <h2>
+   771→                              <p>
+   772→                              <Button size="lg" onClick={function onClick} className="h-14 px-9 ...">
+   773→                                <button data-slot="button" className={"inline-f..."} onClick={function onClick}>
+   774→                                  <Zap className="h-4 w-4 mr-2" strokeWidth={2.5}>
+   775→                                    <svg
+   776→                                      ref={null}
+   777→                                      xmlns="http://www.w3.org/2000/svg"
+   778→                                      width={24}
+   779→                                      height={24}
+   780→                                      viewBox="0 0 24 24"
+   781→                                      fill="none"
+   782→                                      stroke="currentColor"
+   783→                                      strokeWidth={2.5}
+   784→                                      strokeLinecap="round"
+   785→                                      strokeLinejoin="round"
+   786→                                      className="lucide lucide-zap h-4 w-4 mr-2"
+   787→                                      aria-hidden="true"
+   788→-                                     data-darkreader-inline-stroke=""
+   789→-                                     style={{--darkreader-inline-stroke:"currentColor"}}
+   790→                                    >
+   791→                                  ...
+   792→              ...
+   793→      ...
+   794→
+   795→
+   796→
+   797→    at svg (<anonymous>:null:null)
+   798→
+   799→Next.js version: 16.1.3 (Turbopack)
+   800→

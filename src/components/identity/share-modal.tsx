@@ -29,10 +29,16 @@ interface ShareModalProps {
 export function ShareModal({ open, onClose, report }: ShareModalProps) {
   const [copied, setCopied] = React.useState<string | null>(null)
   const [includeScores, setIncludeScores] = React.useState(true)
+  const [shareUrl, setShareUrl] = React.useState('')
+
+  React.useEffect(() => {
+    if (open) {
+      setShareUrl(window.location.href)
+    }
+  }, [open])
 
   if (!open || !report) return null
 
-  const shareUrl = typeof window !== 'undefined' ? window.location.href : ''
   const shareText = `Check out my IdentityScope AI digital identity report for ${report.input.query} — overall score ${report.scores.overall}/100!`
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`
   const linkedinUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`
