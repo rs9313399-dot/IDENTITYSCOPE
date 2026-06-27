@@ -35,6 +35,7 @@ import {
   RefreshCw,
   Brain,
   Sparkles,
+  MessageSquare,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -47,6 +48,7 @@ import { useAppStore } from '@/stores/app-store'
 import { useAiReportStream, useScan } from '@/hooks/use-scan'
 import { DashboardSkeleton } from '@/components/identity/skeletons'
 import { EmptyState } from '@/components/identity/empty-states'
+import { ShareModal } from '@/components/identity/share-modal'
 import {
   ScoreRadar,
   LanguagePie,
@@ -87,6 +89,7 @@ export function DashboardView() {
   const { currentReport: report, setView, setCurrentReport } = useAppStore()
   const aiReport = useAiReportStream()
   const scan = useScan()
+  const [shareOpen, setShareOpen] = React.useState(false)
 
   // Show skeleton while a scan is in progress and no report yet
   if (scan.isPending && !report) {
@@ -113,8 +116,7 @@ export function DashboardView() {
   const scores = report.scores
 
   function handleShare() {
-    const url = window.location.href
-    navigator.clipboard.writeText(url).then(() => toast.success('Report link copied'))
+    setShareOpen(true)
   }
 
   function handlePrint() {
@@ -331,6 +333,9 @@ export function DashboardView() {
           </div>
         </Card>
       </Reveal>
+
+      {/* Share modal */}
+      <ShareModal open={shareOpen} onClose={() => setShareOpen(false)} report={report} />
     </div>
   )
 }
@@ -697,6 +702,7 @@ function SocialSection({
     'Stack Overflow': Search,
     'Hacker News': Flame,
     GitLab: GitFork,
+    Mastodon: MessageSquare,
   }
   const foundCount = social.filter((s) => s.found).length
 

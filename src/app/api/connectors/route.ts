@@ -16,6 +16,7 @@ const CONNECTORS = [
   { id: 'stackoverflow', name: 'Stack Overflow', category: 'social', description: 'Public Stack Overflow profile via SE API.', auth: false },
   { id: 'hackernews', name: 'Hacker News', category: 'social', description: 'Public HN posting activity via Algolia search API.', auth: false },
   { id: 'gitlab', name: 'GitLab', category: 'social', description: 'Public GitLab profile via unauthenticated users API.', auth: false },
+  { id: 'mastodon', name: 'Mastodon', category: 'social', description: 'Public Mastodon profile across 5+ popular instances.', auth: false },
   { id: 'website', name: 'Website Analyzer', category: 'portfolio', description: 'Public HTTP/HTML meta, security headers, tech fingerprint.', auth: false },
   { id: 'email', name: 'Email Validator', category: 'security', description: 'Format, disposable & MX record validation via DoH.', auth: false },
 ]

@@ -303,6 +303,47 @@ async function probeGitLab(username: string): Promise<SocialProfile> {
   return profile
 }
 
+/**
+ * Mastodon probe — checks several popular public instances for the username.
+ * Mastodon is federated, so there's no single API. Each instance exposes
+ * a public /api/v1/accounts/lookup?acct=USER endpoint (unauthenticated).
+ */
+async function probeMastodon(username: string): Promise<SocialProfile> {
+  const profile: SocialProfile = {
+    platform: 'Mastodon',
+    handle: username,
+    url: `https://mastodon.social/@${encodeURIComponent(username)}`,
+    found: false,
+  }
+  // Try a few popular instances in order
+  const instances = ['mastodon.social', 'mas.to', 'hachyderm.io', 'fosstodon.org', 'techhub.social']
+  for (const instance of instances) {
+    try {
+      const res = await resilientFetch(
+        `https://${instance}/api/v1/accounts/lookup?acct=${encodeURIComponent(username)}`,
+        { timeoutMs: 5000, retries: 0, cacheTtl: CACHE_TTL }
+      )
+      if (res.ok) {
+        const u = await res.json()
+        if (u && u.username) {
+          profile.found = true
+          profile.url = u.url ?? `https://${instance}/@${u.username}`
+          profile.avatar = u.avatar ?? null
+          profile.bio = u.note ? u.note.replace(/<[^>]+>/g, '').trim().slice(0, 200) : null
+          profile.followers = u.followers_count ?? 0
+          profile.following = u.following_count ?? 0
+          profile.posts = u.statuses_count ?? 0
+          profile.joinedAt = u.created_at ?? null
+          break // found — stop checking other instances
+        }
+      }
+    } catch {
+      /* try next instance */
+    }
+  }
+  return profile
+}
+
 const probes = [
   probeGitHubAsSocial,
   probeReddit,
@@ -313,6 +354,7 @@ const probes = [
   probeStackOverflow,
   probeHackerNews,
   probeGitLab,
+  probeMastodon,
 ]
 
 export async function search(input: ProbeInput): Promise<SocialProfile[]> {

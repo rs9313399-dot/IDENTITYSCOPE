@@ -329,3 +329,66 @@ Unresolved / next-phase recommendations:
 5. **AI report export**: download the AI report as markdown/JSON.
 6. **Theme customization**: let users pick accent colors.
 7. **Onboarding tour**: first-visit guided tour of features.
+
+---
+Task ID: cron-6
+Agent: webDevReview (cron job 235654)
+Task: Sixth recurring 15-min review — QA via agent-browser, continue styling polish + new features.
+
+Work Log:
+- Read /home/z/my-project/worklog.md — Phase 1 + cron-1/2/3/4/5 complete. Previous rounds: README fix, real contribution calendar, HN+GitLab connectors, Quick Insights, score tooltips, landing rewrite, compare winner badges, skeleton loaders, AI streaming overlay, enhanced empty states, keyboard shortcuts, progressive AI rendering, accessibility audit, lazy-load Recharts.
+- Checked dev.log — server healthy, no errors. Lint clean. AI streaming at 10.8s.
+- Ran agent-browser QA on dashboard empty state — renders correctly.
+- Selected 3 high-impact items: shareable report modal (#1 priority), AI report export, Mastodon connector.
+
+Implemented changes:
+1. **New feature — Share report modal** (`src/components/identity/share-modal.tsx` + `src/components/identity/dashboard-view.tsx`):
+   - New `ShareModal` component with:
+     - **Social share buttons**: Twitter (intent/tweet), LinkedIn (share-offsite), Email (mailto), Copy link.
+     - **Copy link section**: displays current URL with a copy button (shows "Copied" checkmark feedback).
+     - **Export options**: Markdown download (with "include detailed scores" checkbox) and JSON download (full report data).
+     - **Report summary card**: shows overall score, query, source count, date.
+   - Each social button has a colored icon and hover lift effect.
+   - Animated with Framer Motion (scale/fade in/out).
+   - Wired into the dashboard "Share" button — opens the modal.
+   - Markdown export generates a complete report: title, scores table, GitHub analysis, website analysis, email validation, social discovery, AI report (summary, strengths, weaknesses, roadmap).
+   - Verified: modal opens with all sections, Markdown download produces 2.7KB well-formatted file with scores table + GitHub + social + AI sections.
+
+2. **New feature — AI report export (Markdown + JSON)** (integrated in ShareModal):
+   - `downloadMarkdown()`: generates a comprehensive Markdown document with:
+     - Title + privacy notice
+     - Scores table (all 10 dimensions)
+     - GitHub analysis (user, followers, repos, stars, contributions, languages, best project)
+     - Website analysis (HTTPS, performance, SEO, accessibility, technologies)
+     - Email validation (format, MX, disposable, deliverability)
+     - Social discovery (all found platforms with links + followers)
+     - AI report (developer level, executive summary, strengths, weaknesses, roadmap)
+   - `downloadJson()`: exports the full DigitalIdentityReport as pretty-printed JSON.
+   - Both use Blob + URL.createObjectURL for client-side download.
+   - Verified: downloaded `identityscope-torvalds-*.md` (2724 bytes) with complete content.
+
+3. **New connector — Mastodon** (`src/lib/apis/social.ts` + `src/app/api/connectors/route.ts` + `src/components/identity/dashboard-view.tsx`):
+   - `probeMastodon()`: checks 5 popular instances (mastodon.social, mas.to, hachyderm.io, fosstodon.org, techhub.social) via the public `/api/v1/accounts/lookup?acct=USER` endpoint.
+   - Returns avatar, bio (HTML-stripped), followers, following, posts, joined date.
+   - Stops at first instance that has the user.
+   - Added MessageSquare icon for Mastodon in the dashboard social section.
+   - Updated connectors API (now 15 connectors total).
+   - Verified: torvalds found on mastodon.social (@Torvalds) — appears in the Social Discovery section and in the Markdown export.
+
+Stage Summary:
+- All changes lint clean (`bun run lint` passes).
+- Dev server healthy on port 3000 (HTTP 200).
+- Verified end-to-end via agent-browser + VLM:
+  - Share modal: opens with social buttons (Twitter/LinkedIn/Email/Copy), link section with copy button, export section with Markdown/JSON options and "include scores" checkbox, report summary card.
+  - Markdown export: 2.7KB file with scores table, GitHub analysis (309k followers, 249k stars, 3256 contributions), social discovery (including Mastodon @Torvalds), AI report sections.
+  - Mastodon connector: 15 connectors total, torvalds found on mastodon.social.
+- The share modal + export features make reports portable and shareable — users can now download their data or post to social media.
+
+Unresolved / next-phase recommendations:
+1. **Print/PDF polish**: verify SVG charts render correctly in print; dedicated PDF generation route.
+2. **Compare history**: save compare results for re-viewing later.
+3. **Theme customization**: let users pick accent colors.
+4. **Onboarding tour**: first-visit guided tour of features.
+5. **More connectors**: Twitch, YouTube channel lookup, GitLab repo analysis.
+6. **Real-time scan progress**: show per-connector progress during scan instead of a static overlay.
+7. **Report diffing**: compare two scans of the same user over time to show progress.
