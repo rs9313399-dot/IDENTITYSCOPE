@@ -44,7 +44,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useAppStore } from '@/stores/app-store'
-import { useAiReport } from '@/hooks/use-scan'
+import { useAiReport, useScan } from '@/hooks/use-scan'
+import { DashboardSkeleton } from '@/components/identity/skeletons'
 import {
   ScoreRadar,
   LanguagePie,
@@ -84,6 +85,12 @@ const SCORE_DESCRIPTIONS: Record<keyof ScoreSet, string> = {
 export function DashboardView() {
   const { currentReport: report, setView, setCurrentReport } = useAppStore()
   const aiReport = useAiReport()
+  const scan = useScan()
+
+  // Show skeleton while a scan is in progress and no report yet
+  if (scan.isPending && !report) {
+    return <DashboardSkeleton />
+  }
 
   if (!report) {
     return (

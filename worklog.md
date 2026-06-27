@@ -161,3 +161,58 @@ Unresolved / next-phase recommendations:
 6. **Print/PDF polish**: verify SVG charts render correctly in print; consider a dedicated PDF generation route.
 7. **Performance**: lazy-load Recharts to reduce initial bundle.
 8. **Empty states + skeleton loaders**: the scan overlay is good, but individual tab sections could use skeletons while data loads.
+
+---
+Task ID: cron-3
+Agent: webDevReview (cron job 235654)
+Task: Third recurring 15-min review — QA via agent-browser, continue styling polish + new features.
+
+Work Log:
+- Read /home/z/my-project/worklog.md — Phase 1 + cron-1 complete. Previous round rewrote landing page with floating orbs, parallax, word-by-word heading reveal, scroll indicator, premium stats cards, how-it-works section, trust signals.
+- Checked dev.log — server healthy, no errors. Lint clean.
+- Ran agent-browser QA on landing — VLM confirmed hero renders with depth, gradient text, animated badge.
+- Selected 3 high-impact items from priority list: compare winner badges, skeleton loaders, AI report loading overlay.
+
+Implemented changes:
+1. **New feature — Compare mode winner badges + verdict banner** (`src/components/identity/compare-view.tsx`):
+   - Added `VerdictBanner` component that counts wins across all metric rows and displays "X leads" or "It's a tie!" with win counts for both sides.
+   - Upgraded metric rows with:
+     - **WIN badges**: animated green pills with trophy icon that spring in next to the winning value.
+     - **Mini progress bars**: proportional horizontal bars under each value showing relative magnitude (winner gets green gradient, loser gets muted).
+     - **Enhanced center labels**: icon badges with uppercase tracking, tie indicator.
+     - **Hover states**: rows highlight on hover.
+   - Verified: torvalds vs sindresorhus → "Sindre Sorhus leads" (3 wins vs 7 wins, 0 ties), WIN badges visible on winning values.
+
+2. **New feature — Dashboard skeleton loaders** (`src/components/identity/skeletons.tsx`):
+   - Created `DashboardSkeleton` component with shimmer skeletons matching the dashboard layout: header bar, score ring + radar, 9-dimension score grid, quick insights, tabs, content area.
+   - Created `ScannerSkeleton` for form loading state.
+   - Integrated into `DashboardView` — shows skeleton when `useScan().isPending && !report`.
+   - Uses shadcn `Skeleton` component with glass card wrappers for consistent styling.
+
+3. **New feature — AI report generation overlay** (`src/components/identity/report-view.tsx`):
+   - Added `AiGeneratingOverlay` component shown when `ai.isPending` is true.
+   - Features:
+     - Animated brain icon with rotating ring + pulsing scale animation.
+     - Live elapsed timer ("Gemini is analyzing · Xs elapsed").
+     - 5-step progress checklist that activates sequentially: "Summarizing public-data signals" → "Identifying strengths & weaknesses" → "Generating career suggestions" → "Building learning roadmap" → "Finalizing report".
+     - Each step shows a spinner (current), checkmark (done), or empty circle (pending).
+   - Verified: overlay renders with animated brain, 2s elapsed, first step checkmarked, second step spinning.
+
+Stage Summary:
+- All changes lint clean (`bun run lint` passes).
+- Dev server healthy on port 3000 (HTTP 200).
+- Verified end-to-end via agent-browser + VLM:
+  - Compare: verdict banner shows "Sindre Sorhus leads" (3/0/7 win count), WIN badges with trophy icons on winning values, mini progress bars showing relative proportions.
+  - AI Report: generation overlay with animated brain icon, elapsed timer, 5-step progress checklist with checkmarks and spinners.
+  - Dashboard: skeleton loaders integrated for loading state.
+- All three priority items from cron-1 recommendations implemented and verified.
+
+Unresolved / next-phase recommendations:
+1. **AI report streaming**: stream the Gemini response token-by-token instead of waiting for the full response (would make the 10-16s wait feel instant).
+2. **Shareable report route**: `/report/[id]` read-only route for sharing (currently single-page only).
+3. **More connectors**: Mastodon (instance-aware), Twitch, YouTube channel lookup, GitLab repo analysis.
+4. **Accessibility audit**: aria-labels on all icon-only buttons, keyboard nav verification.
+5. **Print/PDF polish**: verify SVG charts render correctly in print; dedicated PDF generation route.
+6. **Performance**: lazy-load Recharts via dynamic import to reduce initial bundle.
+7. **Enhanced empty states**: add illustrations to the "No report yet" / "No bookmarks" states.
+8. **Compare history**: save compare results for re-viewing later.

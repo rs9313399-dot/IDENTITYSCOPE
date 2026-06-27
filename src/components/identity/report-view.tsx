@@ -59,6 +59,9 @@ export function ReportView() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8">
+      {/* AI generation overlay */}
+      {ai.isPending && <AiGeneratingOverlay />}
+
       <Reveal>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
           <div>
@@ -284,5 +287,89 @@ function SuggestionCard({
         <p className="text-sm text-muted-foreground">No suggestions available.</p>
       )}
     </Card>
+  )
+}
+
+/** Animated overlay shown while Gemini is generating the AI report (~10-16s). */
+function AiGeneratingOverlay() {
+  const [elapsed, setElapsed] = React.useState(0)
+  React.useEffect(() => {
+    const start = Date.now()
+    const id = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 200)
+    return () => clearInterval(id)
+  }, [])
+
+  const steps = [
+    { label: 'Summarizing public-data signals', delay: 0 },
+    { label: 'Identifying strengths & weaknesses', delay: 1.5 },
+    { label: 'Generating career suggestions', delay: 3 },
+    { label: 'Building learning roadmap', delay: 5 },
+    { label: 'Finalizing report', delay: 7 },
+  ]
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm no-print"
+    >
+      <motion.div
+        initial={{ scale: 0.95, y: 10 }}
+        animate={{ scale: 1, y: 0 }}
+        className="glass-strong rounded-3xl p-10 max-w-md w-full mx-4 text-center"
+      >
+        {/* Animated brain icon */}
+        <div className="relative mx-auto h-20 w-20 mb-5">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+            className="absolute inset-0 rounded-full border-2 border-primary/20 border-t-primary"
+          />
+          <motion.div
+            animate={{ scale: [1, 1.15, 1] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
+            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-[oklch(0.7_0.25_305)] flex items-center justify-center shadow-lg">
+              <Brain className="h-6 w-6 text-white" />
+            </div>
+          </motion.div>
+        </div>
+
+        <h3 className="font-bold text-lg mb-1">Generating AI report…</h3>
+        <p className="text-sm text-muted-foreground mb-5">
+          Gemini is analyzing the public-data summary · {elapsed}s elapsed
+        </p>
+
+        {/* Animated steps */}
+        <div className="space-y-2 text-left">
+          {steps.map((step, i) => {
+            const active = elapsed >= step.delay
+            const current = active && elapsed < (steps[i + 1]?.delay ?? Infinity)
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0.3 }}
+                animate={{ opacity: active ? 1 : 0.3 }}
+                transition={{ duration: 0.4 }}
+                className="flex items-center gap-2.5 text-xs"
+              >
+                {current ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-primary shrink-0" />
+                ) : active ? (
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                ) : (
+                  <div className="h-3.5 w-3.5 rounded-full border border-muted-foreground/30 shrink-0" />
+                )}
+                <span className={active ? 'text-foreground' : 'text-muted-foreground'}>
+                  {step.label}
+                </span>
+              </motion.div>
+            )
+          })}
+        </div>
+      </motion.div>
+    </motion.div>
   )
 }
