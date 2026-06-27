@@ -15,10 +15,24 @@ import { AboutView } from '@/components/identity/about-view'
 import { useAppStore } from '@/stores/app-store'
 import { useKeyboardShortcuts, ShortcutsHelpDialog } from '@/hooks/use-keyboard-shortcuts'
 import { OnboardingTour } from '@/components/identity/onboarding-tour'
+import { CommandPalette } from '@/components/identity/command-palette'
 
 export default function Home() {
   const view = useAppStore((s) => s.view)
   const { showHelp, setShowHelp, shortcuts } = useKeyboardShortcuts()
+  const [cmdOpen, setCmdOpen] = React.useState(false)
+
+  // Cmd+K / Ctrl+K to open command palette
+  React.useEffect(() => {
+    function handler(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setCmdOpen((v) => !v)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
 
   return (
     <div className="relative min-h-screen flex flex-col">
@@ -47,15 +61,16 @@ export default function Home() {
       <Footer />
       <ShortcutsHelpDialog open={showHelp} onClose={() => setShowHelp(false)} shortcuts={shortcuts} />
       <OnboardingTour />
+      <CommandPalette open={cmdOpen} onClose={() => setCmdOpen(false)} />
       {/* Keyboard hint badge */}
       <button
-        onClick={() => setShowHelp(true)}
+        onClick={() => setCmdOpen(true)}
         className="fixed bottom-4 right-4 z-40 hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg glass text-xs text-muted-foreground hover:text-foreground transition-colors no-print"
-        aria-label="Show keyboard shortcuts"
-        title="Keyboard shortcuts (press ?)"
+        aria-label="Open command palette"
+        title="Command palette (Cmd+K)"
       >
-        <kbd className="font-mono font-semibold text-[10px]">⌘</kbd>
-        <span>Shortcuts</span>
+        <kbd className="font-mono font-semibold text-[10px]">⌘K</kbd>
+        <span>Search</span>
       </button>
     </div>
   )

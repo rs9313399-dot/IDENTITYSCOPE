@@ -446,3 +446,54 @@ Unresolved / next-phase recommendations:
 5. **Compare history**: save compare results for re-viewing later.
 6. **Scan retry individual connectors**: let users retry a single failed connector without re-running the whole scan.
 7. **Custom connector builder**: UI for users to add their own public API connectors.
+
+---
+Task ID: cron-8
+Agent: webDevReview (cron job 235654)
+Task: Eighth recurring 15-min review — QA via agent-browser, continue styling polish + new features.
+
+Work Log:
+- Read /home/z/my-project/worklog.md — Phase 1 + cron-1/2/3/4/5/6/7 complete. Previous rounds: README fix, real contribution calendar, HN+GitLab+Mastodon connectors, Quick Insights, score tooltips, landing rewrite, compare winner badges, skeleton loaders, AI streaming overlay, enhanced empty states, keyboard shortcuts, progressive AI rendering, accessibility audit, lazy-load Recharts, share modal, Markdown/JSON export, real-time scan progress, onboarding tour.
+- Checked dev.log — server healthy, no errors. Lint clean. Scan-stream at 12.7s.
+- Ran agent-browser QA on landing — VLM confirmed solid.
+- Selected 2 high-impact items: theme customization (#3 priority), command palette (new feature).
+
+Implemented changes:
+1. **New feature — Theme customization (accent colors)** (`src/stores/app-store.ts` + `src/components/accent-color-provider.tsx` + `src/components/identity/settings-view.tsx` + `src/app/layout.tsx`):
+   - Added `AccentColor` type and `ACCENT_COLORS` array with 5 colors: Violet (default), Emerald, Rose, Amber, Cyan.
+   - Added `accentColor` to the settings store (persisted to localStorage).
+   - New `AccentColorProvider` component that applies the selected color to `--primary`, `--ring`, `--sidebar-primary`, and `--sidebar-ring` CSS variables on the document root.
+   - Wrapped the app with the provider in layout.tsx.
+   - Added an accent color picker card in the Settings view with 5 color circle buttons — each shows a checkmark when selected, with hover lift effects.
+   - Verified: selected Emerald → "New Scan" button and all UI accents changed to green throughout the app.
+
+2. **New feature — Command palette (Cmd+K)** (`src/components/identity/command-palette.tsx` + `src/app/page.tsx`):
+   - Spotlight/Raycast-style command palette triggered by Cmd+K / Ctrl+K.
+   - Features:
+     - **Search input** with live filtering by label, description, and keywords.
+     - **Grouped results**: "Navigate" (8 nav items) and "Quick scans" (5 example scans: torvalds, sindresorhus, gaearon, vercel.com, dang).
+     - **Keyboard navigation**: ↑/↓ to move, Enter to select, Escape to close.
+     - **Mouse navigation**: hover to select, click to activate.
+     - **Auto-scroll** selected item into view.
+     - **Footer** with keyboard hints and result count.
+     - Animated entrance/exit with Framer Motion.
+   - Quick scans navigate to the scanner with the query pre-filled.
+   - Updated the floating bottom-right button to "⌘K Search" (opens the palette).
+   - Verified: palette opens with Ctrl+K, shows grouped commands, search filters live, selecting "Settings" navigates there.
+
+Stage Summary:
+- All changes lint clean (`bun run lint` passes).
+- Dev server healthy on port 3000 (HTTP 200).
+- Verified end-to-end via agent-browser + VLM:
+  - Accent color picker: 5 color buttons (Violet/Emerald/Rose/Amber/Cyan) in Settings, selecting Emerald changes the New Scan button and all accents to green throughout the app.
+  - Command palette: opens with Ctrl+K, shows search input + grouped commands (Navigate + Quick scans), 13 results, keyboard navigation works.
+- Theme customization gives users personalization; the command palette provides fast keyboard-driven navigation for power users.
+
+Unresolved / next-phase recommendations:
+1. **Print/PDF polish**: verify SVG charts render correctly in print; dedicated PDF generation route.
+2. **Report diffing**: compare two scans of the same user over time to show progress.
+3. **More connectors**: Twitch, YouTube channel lookup, GitLab repo analysis.
+4. **Compare history**: save compare results for re-viewing later.
+5. **Scan retry individual connectors**: retry button on failed connectors.
+6. **Custom connector builder**: UI for users to add their own public API connectors.
+7. **Command palette scan history**: show recent scans as quick actions in the palette.

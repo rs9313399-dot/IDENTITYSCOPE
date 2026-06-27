@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/components/query-provider";
+import { AccentColorProvider } from "@/components/accent-color-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -62,7 +63,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-            {children}
+            <AccentColorProvider>
+              {children}
+            </AccentColorProvider>
             <Toaster />
             <SonnerToaster position="bottom-right" richColors closeButton />
           </QueryProvider>

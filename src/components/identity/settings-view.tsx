@@ -1,14 +1,14 @@
 'use client'
 
 import * as React from 'react'
-import { Settings, Shield, Zap, Clock, Eye, Trash2, RotateCcw } from 'lucide-react'
+import { Settings, Shield, Zap, Clock, Eye, Trash2, RotateCcw, Palette, Check } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { useAppStore, type View } from '@/stores/app-store'
+import { useAppStore, ACCENT_COLORS, type View } from '@/stores/app-store'
 import { Reveal } from '@/components/charts/animated'
 import { toast } from 'sonner'
 
@@ -108,6 +108,44 @@ export function SettingsView() {
                   <SelectItem value="60">1 hour</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+          </Card>
+        </Reveal>
+
+        <Reveal delay={0.18}>
+          <Card className="glass p-5">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="h-9 w-9 rounded-lg bg-primary/15 text-primary flex items-center justify-center shrink-0">
+                <Palette className="h-4 w-4" />
+              </div>
+              <div className="flex-1">
+                <Label className="font-semibold">Accent color</Label>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Customize the primary accent color used throughout the app.
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-5 gap-3">
+              {ACCENT_COLORS.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => updateSettings({ accentColor: c.id })}
+                  className="group flex flex-col items-center gap-2 p-3 rounded-xl glass hover:glow transition-all hover:-translate-y-0.5"
+                  aria-label={`Set accent color to ${c.label}`}
+                >
+                  <div
+                    className="h-8 w-8 rounded-full flex items-center justify-center transition-transform group-hover:scale-110"
+                    style={{ background: c.preview }}
+                  >
+                    {settings.accentColor === c.id && (
+                      <Check className="h-4 w-4 text-white" strokeWidth={3} />
+                    )}
+                  </div>
+                  <span className={`text-[10px] font-medium ${settings.accentColor === c.id ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    {c.label}
+                  </span>
+                </button>
+              ))}
             </div>
           </Card>
         </Reveal>
