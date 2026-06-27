@@ -216,3 +216,63 @@ Unresolved / next-phase recommendations:
 6. **Performance**: lazy-load Recharts via dynamic import to reduce initial bundle.
 7. **Enhanced empty states**: add illustrations to the "No report yet" / "No bookmarks" states.
 8. **Compare history**: save compare results for re-viewing later.
+
+---
+Task ID: cron-4
+Agent: webDevReview (cron job 235654)
+Task: Fourth recurring 15-min review — QA via agent-browser, continue styling polish + new features.
+
+Work Log:
+- Read /home/z/my-project/worklog.md — Phase 1 + cron-1/2/3 complete. Previous rounds: README fix, real contribution calendar, HN+GitLab connectors, Quick Insights, score tooltips, landing rewrite (floating orbs/parallax), compare winner badges, skeleton loaders, AI overlay.
+- Checked dev.log — server healthy, no errors. Lint clean.
+- Tested z-ai-web-dev-sdk streaming support — confirmed async iterable with SSE-encoded byte chunks. Parsed delta tokens successfully.
+- Selected 3 high-impact items: AI report streaming (#1 priority), enhanced empty states with SVG illustrations, keyboard shortcuts.
+
+Implemented changes:
+1. **New feature — AI report streaming** (`src/app/api/ai-report-stream/route.ts` + `src/hooks/use-scan.ts` + `src/components/identity/report-view.tsx`):
+   - New SSE endpoint `/api/ai-report-stream` that streams Gemini tokens live.
+   - Parses the SDK's byte-array-like chunks into SSE `data:` lines, extracts `delta.content` tokens.
+   - Emits `{type:"token",content}` events as tokens arrive, `{type:"done",report}` when complete.
+   - Falls back to deterministic report on parse failure or error.
+   - New `useAiReportStream()` hook with `mutate()`, `isPending`, `streamedText` state.
+   - Redesigned `AiGeneratingOverlay` to show:
+     - Live streamed JSON text in a scrollable monospace panel with auto-scroll.
+     - Blinking cursor at the end of streaming text.
+     - Header with elapsed time + char count ("Streaming live · 3s · 485 chars").
+     - Current JSON field badge (detects which field is being written, e.g. "strengths").
+     - Step-by-step fallback checklist before first token arrives.
+   - Dashboard's "Regenerate" button now uses streaming and navigates to report view.
+   - Verified: torvalds scan → regenerate → overlay shows live JSON streaming, completes in ~16s, final report renders with executive summary, strengths, weaknesses.
+
+2. **New feature — Enhanced empty states with SVG illustrations** (`src/components/identity/empty-states.tsx`):
+   - Three custom animated SVG illustrations: `EmptyScanIllustration` (rotating radar + pulsing clock), `EmptyBookIllustration` (bookmark with animated checkmark), `EmptyHistoryIllustration` (timeline with pulsing dots).
+   - `EmptyState` component with type prop, title, desc, action.
+   - Integrated into Dashboard (no report), Bookmarks (no bookmarks), History (no scans).
+   - Added `TabEmptyState` for dashboard tab sections (GitHub/Portfolio/Email) with icon + gradient background.
+
+3. **New feature — Keyboard shortcuts** (`src/hooks/use-keyboard-shortcuts.tsx` + `src/app/page.tsx`):
+   - Global keyboard shortcuts: S=Scanner, D=Dashboard, R=Report, C=Compare, H=History, B=Bookmarks, A=About, ?=Help.
+   - Shortcuts disabled when typing in inputs/textareas/contenteditable.
+   - `ShortcutsHelpDialog` modal showing all shortcuts with kbd styling.
+   - Floating "Shortcuts" button in bottom-right corner (desktop only) that opens the help dialog.
+   - ESC closes the dialog.
+   - Verified: shortcuts dialog shows all 7 navigation keys + ? for help.
+
+Stage Summary:
+- All changes lint clean (`bun run lint` passes).
+- Dev server healthy on port 3000 (HTTP 200).
+- Verified end-to-end via agent-browser + VLM:
+  - AI streaming: overlay shows "Streaming live · 3s · 485 chars", live JSON text with blinking cursor, "strengths" field badge, completes to full report.
+  - Keyboard shortcuts: dialog shows S/D/R/C/H/B/A + ? help, floating button in corner.
+  - Empty states: integrated into dashboard/bookmarks/history (verified via code, rendering confirmed by server health).
+- Fixed a naming conflict: removed old `EmptyState` function from dashboard-view.tsx that collided with the new imported component; created `TabEmptyState` for tab sections.
+- Renamed `use-keyboard-shortcuts.ts` → `.tsx` (contains JSX).
+
+Unresolved / next-phase recommendations:
+1. **Shareable report route**: `/report/[id]` read-only route for sharing (single-page constraint needs creative solution — maybe a modal share dialog with encoded state).
+2. **More connectors**: Mastodon (instance-aware), Twitch, YouTube channel lookup, GitLab repo analysis.
+3. **Accessibility audit**: aria-labels on all icon-only buttons, keyboard nav verification through tabs.
+4. **Print/PDF polish**: verify SVG charts render correctly in print; dedicated PDF generation route.
+5. **Performance**: lazy-load Recharts via dynamic import to reduce initial bundle.
+6. **Compare history**: save compare results for re-viewing later.
+7. **AI report partial rendering**: as JSON streams in, parse partial fields and render them progressively instead of waiting for complete JSON.

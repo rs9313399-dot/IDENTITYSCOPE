@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/stores/app-store'
 import { useBookmarks, loadScanById } from '@/hooks/use-scan'
 import { Reveal, scoreColor, scoreLabel } from '@/components/charts/animated'
+import { EmptyState } from '@/components/identity/empty-states'
 import { toast } from 'sonner'
 
 export function BookmarksView() {
@@ -47,14 +48,13 @@ export function BookmarksView() {
           </div>
         </Card>
       ) : !data || data.scans.length === 0 ? (
-        <Card className="glass p-12 text-center">
-          <Inbox className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-          <h3 className="font-semibold mb-1">No bookmarks yet</h3>
-          <p className="text-sm text-muted-foreground mb-5">
-            Bookmark reports from the dashboard to save them here.
-          </p>
-          <Button onClick={() => setView('history')}>Browse history</Button>
-        </Card>
+        <EmptyState
+          type="bookmarks"
+          title="No bookmarks yet"
+          desc="Bookmark reports from the dashboard to save them here for quick access later."
+          actionLabel="Browse history"
+          onAction={() => setView('history')}
+        />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {data.scans.map((s, i) => {

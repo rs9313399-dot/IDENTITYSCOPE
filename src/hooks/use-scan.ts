@@ -1,5 +1,6 @@
 'use client'
 
+import * as React from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import type { DigitalIdentityReport, ScanInput, AIReport } from '@/lib/types'
@@ -52,6 +53,84 @@ export function useAiReport() {
       toast.error(err.message || 'AI report generation failed')
     },
   })
+}
+
+/**
+ * Streaming AI report hook.
+ * Calls /api/ai-report-stream and invokes onToken for each streamed token.
+ * Returns { mutate, isPending, streamedText, reset }.
+ */
+export function useAiReportStream() {
+  const [isPending, setIsPending] = React.useState(false)
+  const [streamedText, setStreamedText] = React.useState('')
+
+  const mutate = React.useCallback(
+    async (
+      report: DigitalIdentityReport,
+      options?: {
+        onToken?: (text: string) => void
+        onDone?: (ai: AIReport) => void
+        onError?: (err: Error) => void
+      }
+    ) => {
+      setIsPending(true)
+      setStreamedText('')
+      let acc = ''
+      try {
+        const res = await fetch('/api/ai-report-stream', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ report }),
+        })
+        if (!res.ok || !res.body) throw new Error('Stream failed')
+
+        const reader = res.body.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ''
+
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n')
+          buffer = lines.pop() ?? ''
+          for (const line of lines) {
+            if (!line.startsWith('data: ')) continue
+            try {
+              const evt = JSON.parse(line.slice(6))
+              if (evt.type === 'token' && evt.content) {
+                acc += evt.content
+                setStreamedText(acc)
+                options?.onToken?.(evt.content)
+              } else if (evt.type === 'done' && evt.report) {
+                options?.onDone?.(evt.report)
+                if (evt.fallback) toast.info('AI stream fell back to deterministic report')
+                else toast.success('AI report generated')
+              } else if (evt.type === 'error') {
+                if (evt.report) options?.onDone?.(evt.report)
+                else options?.onError?.(new Error(evt.message || 'unknown'))
+              }
+            } catch {
+              /* skip */
+            }
+          }
+        }
+      } catch (err) {
+        options?.onError?.(err instanceof Error ? err : new Error('unknown'))
+        toast.error('AI report generation failed')
+      } finally {
+        setIsPending(false)
+      }
+    },
+    []
+  )
+
+  const reset = React.useCallback(() => {
+    setStreamedText('')
+    setIsPending(false)
+  }, [])
+
+  return { mutate, isPending, streamedText, reset }
 }
 
 export function useHistory(q?: string) {

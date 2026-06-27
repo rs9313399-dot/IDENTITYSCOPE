@@ -23,12 +23,12 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { useAppStore } from '@/stores/app-store'
-import { useAiReport } from '@/hooks/use-scan'
+import { useAiReportStream } from '@/hooks/use-scan'
 import { Reveal, ProgressRing, scoreColor } from '@/components/charts/animated'
 
 export function ReportView() {
   const { currentReport: report, setCurrentReport, setView } = useAppStore()
-  const ai = useAiReport()
+  const ai = useAiReportStream()
 
   if (!report) {
     return (
@@ -51,7 +51,7 @@ export function ReportView() {
   function regenerate() {
     if (!report) return
     ai.mutate(report, {
-      onSuccess: (data) => {
+      onDone: (data) => {
         setCurrentReport({ ...report, aiReport: data })
       },
     })
@@ -59,8 +59,8 @@ export function ReportView() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-8">
-      {/* AI generation overlay */}
-      {ai.isPending && <AiGeneratingOverlay />}
+      {/* AI generation overlay with live streamed text */}
+      {ai.isPending && <AiGeneratingOverlay streamedText={ai.streamedText} />}
 
       <Reveal>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
@@ -291,20 +291,38 @@ function SuggestionCard({
 }
 
 /** Animated overlay shown while Gemini is generating the AI report (~10-16s). */
-function AiGeneratingOverlay() {
+function AiGeneratingOverlay({ streamedText }: { streamedText: string }) {
   const [elapsed, setElapsed] = React.useState(0)
+  const scrollRef = React.useRef<HTMLDivElement>(null)
+
   React.useEffect(() => {
     const start = Date.now()
     const id = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 200)
     return () => clearInterval(id)
   }, [])
 
+  // Auto-scroll the streamed text to the bottom
+  React.useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    }
+  }, [streamedText])
+
+  const hasText = streamedText.length > 0
+  // Detect which JSON field is currently being written
+  const currentField = React.useMemo(() => {
+    const m = streamedText.match(/"(\w+)":\s*(\[[^"]*|"[^"]*)$/)
+    if (m) return m[1]
+    const m2 = streamedText.match(/"(\w+)":\s*"/)
+    const all = [...streamedText.matchAll(/"(\w+)":\s*"/g)]
+    return all.length > 0 ? all[all.length - 1][1] : null
+  }, [streamedText])
+
   const steps = [
-    { label: 'Summarizing public-data signals', delay: 0 },
-    { label: 'Identifying strengths & weaknesses', delay: 1.5 },
-    { label: 'Generating career suggestions', delay: 3 },
-    { label: 'Building learning roadmap', delay: 5 },
-    { label: 'Finalizing report', delay: 7 },
+    { label: 'Connecting to Gemini', delay: 0 },
+    { label: 'Streaming response tokens', delay: 1 },
+    { label: 'Parsing JSON structure', delay: 3 },
+    { label: 'Finalizing report', delay: 8 },
   ]
 
   return (
@@ -312,62 +330,90 @@ function AiGeneratingOverlay() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm no-print"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-background/85 backdrop-blur-md no-print p-4"
     >
       <motion.div
         initial={{ scale: 0.95, y: 10 }}
         animate={{ scale: 1, y: 0 }}
-        className="glass-strong rounded-3xl p-10 max-w-md w-full mx-4 text-center"
+        className="glass-strong rounded-3xl max-w-2xl w-full overflow-hidden flex flex-col"
+        style={{ maxHeight: '85vh' }}
       >
-        {/* Animated brain icon */}
-        <div className="relative mx-auto h-20 w-20 mb-5">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-            className="absolute inset-0 rounded-full border-2 border-primary/20 border-t-primary"
-          />
-          <motion.div
-            animate={{ scale: [1, 1.15, 1] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute inset-0 flex items-center justify-center"
-          >
-            <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-primary to-[oklch(0.7_0.25_305)] flex items-center justify-center shadow-lg">
-              <Brain className="h-6 w-6 text-white" />
+        {/* Header */}
+        <div className="flex items-center gap-3 p-5 border-b border-border/40 shrink-0">
+          <div className="relative h-10 w-10 shrink-0">
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+              className="absolute inset-0 rounded-full border-2 border-primary/20 border-t-primary"
+            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Brain className="h-5 w-5 text-primary" />
             </div>
-          </motion.div>
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-bold text-sm">Generating AI report…</h3>
+            <p className="text-xs text-muted-foreground">
+              {hasText
+                ? `Streaming live · ${elapsed}s · ${streamedText.length} chars`
+                : `Connecting to Gemini · ${elapsed}s`}
+            </p>
+          </div>
+          {currentField && (
+            <Badge variant="secondary" className="text-xs gap-1 shrink-0">
+              <Sparkles className="h-3 w-3" />
+              {currentField}
+            </Badge>
+          )}
         </div>
 
-        <h3 className="font-bold text-lg mb-1">Generating AI report…</h3>
-        <p className="text-sm text-muted-foreground mb-5">
-          Gemini is analyzing the public-data summary · {elapsed}s elapsed
-        </p>
+        {/* Live streamed text */}
+        <div
+          ref={scrollRef}
+          className="flex-1 overflow-y-auto scrollbar-thin p-5 min-h-[200px] max-h-[400px]"
+        >
+          {hasText ? (
+            <pre className="text-xs font-mono text-foreground/80 whitespace-pre-wrap break-words leading-relaxed">
+              {streamedText}
+              <motion.span
+                animate={{ opacity: [1, 0, 1] }}
+                transition={{ duration: 0.8, repeat: Infinity }}
+                className="inline-block w-2 h-3.5 bg-primary ml-0.5 align-text-bottom rounded-sm"
+              />
+            </pre>
+          ) : (
+            <div className="space-y-2.5">
+              {steps.map((step, i) => {
+                const active = elapsed >= step.delay
+                const current = active && elapsed < (steps[i + 1]?.delay ?? Infinity)
+                return (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0.3 }}
+                    animate={{ opacity: active ? 1 : 0.3 }}
+                    transition={{ duration: 0.4 }}
+                    className="flex items-center gap-2.5 text-xs"
+                  >
+                    {current ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-primary shrink-0" />
+                    ) : active ? (
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                    ) : (
+                      <div className="h-3.5 w-3.5 rounded-full border border-muted-foreground/30 shrink-0" />
+                    )}
+                    <span className={active ? 'text-foreground' : 'text-muted-foreground'}>
+                      {step.label}
+                    </span>
+                  </motion.div>
+                )
+              })}
+            </div>
+          )}
+        </div>
 
-        {/* Animated steps */}
-        <div className="space-y-2 text-left">
-          {steps.map((step, i) => {
-            const active = elapsed >= step.delay
-            const current = active && elapsed < (steps[i + 1]?.delay ?? Infinity)
-            return (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0.3 }}
-                animate={{ opacity: active ? 1 : 0.3 }}
-                transition={{ duration: 0.4 }}
-                className="flex items-center gap-2.5 text-xs"
-              >
-                {current ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-primary shrink-0" />
-                ) : active ? (
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                ) : (
-                  <div className="h-3.5 w-3.5 rounded-full border border-muted-foreground/30 shrink-0" />
-                )}
-                <span className={active ? 'text-foreground' : 'text-muted-foreground'}>
-                  {step.label}
-                </span>
-              </motion.div>
-            )
-          })}
+        {/* Footer */}
+        <div className="p-3 border-t border-border/40 shrink-0 flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground">
+          <Shield className="h-3 w-3 text-emerald-500" />
+          Generated from public data only · No private information accessed
         </div>
       </motion.div>
     </motion.div>

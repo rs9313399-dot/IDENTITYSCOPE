@@ -44,8 +44,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useAppStore } from '@/stores/app-store'
-import { useAiReport, useScan } from '@/hooks/use-scan'
+import { useAiReportStream, useScan } from '@/hooks/use-scan'
 import { DashboardSkeleton } from '@/components/identity/skeletons'
+import { EmptyState } from '@/components/identity/empty-states'
 import {
   ScoreRadar,
   LanguagePie,
@@ -84,7 +85,7 @@ const SCORE_DESCRIPTIONS: Record<keyof ScoreSet, string> = {
 
 export function DashboardView() {
   const { currentReport: report, setView, setCurrentReport } = useAppStore()
-  const aiReport = useAiReport()
+  const aiReport = useAiReportStream()
   const scan = useScan()
 
   // Show skeleton while a scan is in progress and no report yet
@@ -94,15 +95,14 @@ export function DashboardView() {
 
   if (!report) {
     return (
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-20 text-center">
-        <div className="glass rounded-3xl p-10">
-          <Search className="h-10 w-10 mx-auto text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold mb-2">No report yet</h2>
-          <p className="text-muted-foreground text-sm mb-6">
-            Run a scan to see your full digital identity dashboard.
-          </p>
-          <Button onClick={() => setView('scanner')}>Start a scan</Button>
-        </div>
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-20">
+        <EmptyState
+          type="scan"
+          title="No report yet"
+          desc="Run a scan to see your full digital identity dashboard — GitHub analysis, scores, social discovery and AI insights."
+          actionLabel="Start a scan"
+          onAction={() => setView('scanner')}
+        />
       </div>
     )
   }
@@ -123,10 +123,10 @@ export function DashboardView() {
 
   function handleRegenerateAi() {
     aiReport.mutate(report, {
-      onSuccess: (ai) => {
+      onDone: (ai) => {
         const updated = { ...report, aiReport: ai }
         setCurrentReport(updated)
-        toast.success('AI report regenerated with Gemini')
+        setView('report')
       },
     })
   }
@@ -274,14 +274,14 @@ export function DashboardView() {
         {/* GitHub tab */}
         <TabsContent value="github" className="space-y-4">
           {g ? <GitHubSection g={g} /> : (
-            <EmptyState icon={Github} title="No GitHub data" desc="Add a GitHub handle to see deep analysis." />
+            <TabEmptyState icon={Github} title="No GitHub data" desc="Add a GitHub handle to see deep analysis." />
           )}
         </TabsContent>
 
         {/* Portfolio tab */}
         <TabsContent value="portfolio" className="space-y-4">
           {w ? <PortfolioSection w={w} /> : (
-            <EmptyState icon={Globe} title="No website analyzed" desc="Add a website URL to analyze performance, SEO, security." />
+            <TabEmptyState icon={Globe} title="No website analyzed" desc="Add a website URL to analyze performance, SEO, security." />
           )}
         </TabsContent>
 
@@ -293,7 +293,7 @@ export function DashboardView() {
         {/* Email tab */}
         <TabsContent value="email" className="space-y-4">
           {e ? <EmailSection e={e} /> : (
-            <EmptyState icon={Mail} title="No email analyzed" desc="Add an email to validate format, MX records and deliverability." />
+            <TabEmptyState icon={Mail} title="No email analyzed" desc="Add an email to validate format, MX records and deliverability." />
           )}
         </TabsContent>
 
@@ -1008,18 +1008,6 @@ function RepoCard({ label, icon: Icon, color, repo }: { label: string; icon: Rea
   )
 }
 
-function EmptyState({ icon: Icon, title, desc }: { icon: React.ElementType; title: string; desc: string }) {
-  const setView = useAppStore((s) => s.setView)
-  return (
-    <Card className="glass p-10 text-center">
-      <Icon className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
-      <h3 className="font-semibold mb-1">{title}</h3>
-      <p className="text-sm text-muted-foreground mb-4">{desc}</p>
-      <Button size="sm" onClick={() => setView('scanner')}>Run a new scan</Button>
-    </Card>
-  )
-}
-
 /* ----------------------------- Quick Insights ----------------------------- */
 
 interface Insight {
@@ -1232,4 +1220,22 @@ function formatCompact(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
   if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`
   return String(n)
+}
+
+/** Compact empty state for tab sections (no illustration, just icon + text). */
+function TabEmptyState({ icon: Icon, title, desc }: { icon: React.ElementType; title: string; desc: string }) {
+  const setView = useAppStore((s) => s.setView)
+  return (
+    <Card className="glass p-10 text-center relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,oklch(0.72_0.19_265/0.04),transparent_70%)]" />
+      <div className="relative">
+        <div className="mx-auto h-14 w-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mb-3">
+          <Icon className="h-7 w-7" />
+        </div>
+        <h3 className="font-semibold mb-1">{title}</h3>
+        <p className="text-sm text-muted-foreground mb-5 max-w-sm mx-auto">{desc}</p>
+        <Button size="sm" onClick={() => setView('scanner')}>Run a new scan</Button>
+      </div>
+    </Card>
+  )
 }

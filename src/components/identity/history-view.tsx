@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge'
 import { useAppStore } from '@/stores/app-store'
 import { useHistory, loadScanById, deleteScan, toggleBookmark } from '@/hooks/use-scan'
 import { Reveal, scoreColor, scoreLabel } from '@/components/charts/animated'
+import { EmptyState } from '@/components/identity/empty-states'
 import { useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
@@ -94,14 +95,13 @@ export function HistoryView() {
           </div>
         </Card>
       ) : !data || data.scans.length === 0 ? (
-        <Card className="glass p-12 text-center">
-          <Inbox className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-          <h3 className="font-semibold mb-1">No scans yet</h3>
-          <p className="text-sm text-muted-foreground mb-5">
-            Run your first scan to start building your digital identity history.
-          </p>
-          <Button onClick={() => setView('scanner')}>Start a scan</Button>
-        </Card>
+        <EmptyState
+          type="history"
+          title="No scans yet"
+          desc="Run your first scan to start building your digital identity history. All scans are saved locally."
+          actionLabel="Start a scan"
+          onAction={() => setView('scanner')}
+        />
       ) : (
         <div className="space-y-2.5">
           {data.scans.map((s, i) => {

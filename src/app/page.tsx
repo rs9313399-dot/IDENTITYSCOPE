@@ -13,9 +13,11 @@ import { BookmarksView } from '@/components/identity/bookmarks-view'
 import { SettingsView } from '@/components/identity/settings-view'
 import { AboutView } from '@/components/identity/about-view'
 import { useAppStore } from '@/stores/app-store'
+import { useKeyboardShortcuts, ShortcutsHelpDialog } from '@/hooks/use-keyboard-shortcuts'
 
 export default function Home() {
   const view = useAppStore((s) => s.view)
+  const { showHelp, setShowHelp, shortcuts } = useKeyboardShortcuts()
 
   return (
     <div className="relative min-h-screen flex flex-col">
@@ -42,6 +44,17 @@ export default function Home() {
         </AnimatePresence>
       </main>
       <Footer />
+      <ShortcutsHelpDialog open={showHelp} onClose={() => setShowHelp(false)} shortcuts={shortcuts} />
+      {/* Keyboard hint badge */}
+      <button
+        onClick={() => setShowHelp(true)}
+        className="fixed bottom-4 right-4 z-40 hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg glass text-xs text-muted-foreground hover:text-foreground transition-colors no-print"
+        aria-label="Show keyboard shortcuts"
+        title="Keyboard shortcuts (press ?)"
+      >
+        <kbd className="font-mono font-semibold text-[10px]">⌘</kbd>
+        <span>Shortcuts</span>
+      </button>
     </div>
   )
 }
