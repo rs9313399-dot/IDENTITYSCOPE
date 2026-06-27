@@ -276,3 +276,56 @@ Unresolved / next-phase recommendations:
 5. **Performance**: lazy-load Recharts via dynamic import to reduce initial bundle.
 6. **Compare history**: save compare results for re-viewing later.
 7. **AI report partial rendering**: as JSON streams in, parse partial fields and render them progressively instead of waiting for complete JSON.
+
+---
+Task ID: cron-5
+Agent: webDevReview (cron job 235654)
+Task: Fifth recurring 15-min review — QA via agent-browser, continue styling polish + new features.
+
+Work Log:
+- Read /home/z/my-project/worklog.md — Phase 1 + cron-1/2/3/4 complete. Previous rounds: README fix, real contribution calendar, HN+GitLab connectors, Quick Insights, score tooltips, landing rewrite, compare winner badges, skeleton loaders, AI streaming overlay, enhanced empty states, keyboard shortcuts.
+- Checked dev.log — server healthy, no errors. Lint clean. AI streaming confirmed working (14s).
+- Ran agent-browser QA on history view — VLM noted action buttons were hidden until hover.
+- Selected 3 high-impact items: progressive AI report rendering (#7 priority), accessibility audit, lazy-load Recharts.
+
+Implemented changes:
+1. **New feature — Progressive AI report rendering** (`src/lib/partial-json.ts` + `src/components/identity/report-view.tsx`):
+   - Created `parsePartialAIReport()` — a forgiving partial-JSON parser that extracts completed fields (strings, string arrays, roadmap objects) from incomplete JSON as it streams.
+   - Extracts: executiveSummary, strengths, weaknesses, developerLevel, careerSuggestions, resumeSuggestions, portfolioSuggestions, githubImprovements, learningRoadmap, openSourceSuggestions.
+   - `countPopulatedFields()` counts how many of the 10 fields are populated for progress indication.
+   - Redesigned `AiGeneratingOverlay` into a two-panel layout:
+     - **Left panel "Raw stream"**: the raw JSON being written (monospace, auto-scrolling, blinking cursor).
+     - **Right panel "Live preview"**: progressively-rendered fields appear as they complete — developer level (gradient text), executive summary, strengths/weaknesses/career/GitHub lists with staggered animations, roadmap phases.
+     - **Progress bar** at top showing X/10 fields populated.
+     - Header shows "Streaming live · 6s · 2066 chars · 2/10 fields" + current field badge.
+   - Added `ProgressiveList` component for rendering string arrays with staggered item animations.
+   - Verified: torvalds regenerate → two-panel overlay with raw stream + live preview, fields populate progressively, completes to full report.
+
+2. **Accessibility audit — aria-labels** (`src/components/identity/history-view.tsx`):
+   - Added aria-labels to all icon-only buttons in history view: "Add/Remove bookmark", "Open report", "Delete scan".
+   - Changed action buttons from `opacity-0` (hidden until hover) to `opacity-60` (visible but subtle, full opacity on hover) for better discoverability.
+   - Header already had comprehensive aria-labels (home, GitHub, theme toggle, menu).
+
+3. **Performance — lazy-load Recharts** (`src/components/charts/lazy.tsx`):
+   - Created lazy wrappers for all 5 chart components (ScoreRadar, LanguagePie, RepoBarChart, CommitActivityChart, ContributionHeatmap) using `next/dynamic` with `ssr: false`.
+   - Each shows a Skeleton loading state while Recharts loads.
+   - Updated dashboard-view.tsx and compare-view.tsx to import from `@/components/charts/lazy` instead of `@/components/charts`.
+   - This keeps Recharts (~150KB) out of the initial bundle — it only loads when the dashboard or compare view is rendered.
+
+Stage Summary:
+- All changes lint clean (`bun run lint` passes).
+- Dev server healthy on port 3000 (HTTP 200).
+- Verified end-to-end via agent-browser + VLM:
+  - Progressive overlay: two-panel layout with "Raw stream" (left) and "Live preview" (right), progress bar at top, "2/10 fields" counter, current field badge ("githubImprovements"), fields populate progressively with staggered animations, completes to full report.
+  - History action buttons: now visible at 60% opacity, aria-labels added.
+  - Lazy charts: dashboard still renders correctly with chart skeletons during load.
+- The progressive rendering transforms the AI report UX — users see the report building field-by-field instead of staring at raw JSON, making the 14s generation feel much faster.
+
+Unresolved / next-phase recommendations:
+1. **Shareable report**: modal share dialog with copyable link (encode report ID or compressed state).
+2. **More connectors**: Mastodon (instance-aware), Twitch, YouTube channel lookup, GitLab repo analysis.
+3. **Print/PDF polish**: verify SVG charts render correctly in print; dedicated PDF generation route.
+4. **Compare history**: save compare results for re-viewing later.
+5. **AI report export**: download the AI report as markdown/JSON.
+6. **Theme customization**: let users pick accent colors.
+7. **Onboarding tour**: first-visit guided tour of features.

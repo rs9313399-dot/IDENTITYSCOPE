@@ -25,7 +25,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { useAppStore } from '@/stores/app-store'
 import { useScan } from '@/hooks/use-scan'
 import { Reveal, ProgressRing, scoreColor, AnimatedCounter } from '@/components/charts/animated'
-import { ScoreRadar } from '@/components/charts'
+import { ScoreRadar } from '@/components/charts/lazy'
 import type { DigitalIdentityReport, ScoreSet } from '@/lib/types'
 
 interface SideState {

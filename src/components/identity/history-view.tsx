@@ -140,14 +140,32 @@ export function HistoryView() {
                         {scoreLabel(score)}
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => bookmark(s.id, s.bookmarked)}>
+                    <div className="flex items-center gap-1 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8"
+                        onClick={() => bookmark(s.id, s.bookmarked)}
+                        aria-label={s.bookmarked ? 'Remove bookmark' : 'Add bookmark'}
+                      >
                         <Bookmark className={`h-3.5 w-3.5 ${s.bookmarked ? 'fill-amber-500 text-amber-500' : ''}`} />
                       </Button>
-                      <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => open(s.id)}>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8"
+                        onClick={() => open(s.id)}
+                        aria-label="Open report"
+                      >
                         <ExternalLink className="h-3.5 w-3.5" />
                       </Button>
-                      <Button size="icon" variant="ghost" className="h-8 w-8 hover:text-red-500" onClick={() => remove(s.id)}>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 hover:text-red-500"
+                        onClick={() => remove(s.id)}
+                        aria-label="Delete scan"
+                      >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>

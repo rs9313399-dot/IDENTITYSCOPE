@@ -53,7 +53,7 @@ import {
   RepoBarChart,
   CommitActivityChart,
   ContributionHeatmap,
-} from '@/components/charts'
+} from '@/components/charts/lazy'
 import { AnimatedCounter, ProgressRing, Reveal, scoreColor, scoreLabel } from '@/components/charts/animated'
 import type { DigitalIdentityReport, ScoreSet } from '@/lib/types'
 import { toast } from 'sonner'

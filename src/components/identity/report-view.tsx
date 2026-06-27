@@ -25,6 +25,7 @@ import { Card } from '@/components/ui/card'
 import { useAppStore } from '@/stores/app-store'
 import { useAiReportStream } from '@/hooks/use-scan'
 import { Reveal, ProgressRing, scoreColor } from '@/components/charts/animated'
+import { parsePartialAIReport, countPopulatedFields, TOTAL_AI_FIELDS } from '@/lib/partial-json'
 
 export function ReportView() {
   const { currentReport: report, setCurrentReport, setView } = useAppStore()
@@ -293,7 +294,8 @@ function SuggestionCard({
 /** Animated overlay shown while Gemini is generating the AI report (~10-16s). */
 function AiGeneratingOverlay({ streamedText }: { streamedText: string }) {
   const [elapsed, setElapsed] = React.useState(0)
-  const scrollRef = React.useRef<HTMLDivElement>(null)
+  const jsonScrollRef = React.useRef<HTMLDivElement>(null)
+  const previewScrollRef = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
     const start = Date.now()
@@ -301,22 +303,17 @@ function AiGeneratingOverlay({ streamedText }: { streamedText: string }) {
     return () => clearInterval(id)
   }, [])
 
-  // Auto-scroll the streamed text to the bottom
+  // Auto-scroll both panels to the bottom
   React.useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+    if (jsonScrollRef.current) {
+      jsonScrollRef.current.scrollTop = jsonScrollRef.current.scrollHeight
     }
   }, [streamedText])
 
   const hasText = streamedText.length > 0
-  // Detect which JSON field is currently being written
-  const currentField = React.useMemo(() => {
-    const m = streamedText.match(/"(\w+)":\s*(\[[^"]*|"[^"]*)$/)
-    if (m) return m[1]
-    const m2 = streamedText.match(/"(\w+)":\s*"/)
-    const all = [...streamedText.matchAll(/"(\w+)":\s*"/g)]
-    return all.length > 0 ? all[all.length - 1][1] : null
-  }, [streamedText])
+  const partial = React.useMemo(() => parsePartialAIReport(streamedText), [streamedText])
+  const populatedCount = React.useMemo(() => countPopulatedFields(partial), [partial])
+  const progressPct = Math.round((populatedCount / TOTAL_AI_FIELDS) * 100)
 
   const steps = [
     { label: 'Connecting to Gemini', delay: 0 },
@@ -335,79 +332,169 @@ function AiGeneratingOverlay({ streamedText }: { streamedText: string }) {
       <motion.div
         initial={{ scale: 0.95, y: 10 }}
         animate={{ scale: 1, y: 0 }}
-        className="glass-strong rounded-3xl max-w-2xl w-full overflow-hidden flex flex-col"
-        style={{ maxHeight: '85vh' }}
+        className="glass-strong rounded-3xl max-w-4xl w-full overflow-hidden flex flex-col"
+        style={{ maxHeight: '88vh' }}
       >
-        {/* Header */}
-        <div className="flex items-center gap-3 p-5 border-b border-border/40 shrink-0">
-          <div className="relative h-10 w-10 shrink-0">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
-              className="absolute inset-0 rounded-full border-2 border-primary/20 border-t-primary"
-            />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Brain className="h-5 w-5 text-primary" />
+        {/* Header with progress bar */}
+        <div className="p-5 border-b border-border/40 shrink-0">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="relative h-10 w-10 shrink-0">
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+                className="absolute inset-0 rounded-full border-2 border-primary/20 border-t-primary"
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <Brain className="h-5 w-5 text-primary" />
+              </div>
             </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-sm">Generating AI report…</h3>
+              <p className="text-xs text-muted-foreground">
+                {hasText
+                  ? `Streaming live · ${elapsed}s · ${streamedText.length} chars · ${populatedCount}/${TOTAL_AI_FIELDS} fields`
+                  : `Connecting to Gemini · ${elapsed}s`}
+              </p>
+            </div>
+            {partial.currentField && (
+              <Badge variant="secondary" className="text-xs gap-1 shrink-0">
+                <Sparkles className="h-3 w-3" />
+                {partial.currentField}
+              </Badge>
+            )}
           </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-sm">Generating AI report…</h3>
-            <p className="text-xs text-muted-foreground">
-              {hasText
-                ? `Streaming live · ${elapsed}s · ${streamedText.length} chars`
-                : `Connecting to Gemini · ${elapsed}s`}
-            </p>
+          {/* Progress bar */}
+          <div className="h-1 rounded-full bg-muted/40 overflow-hidden">
+            <motion.div
+              animate={{ width: `${progressPct}%` }}
+              transition={{ duration: 0.3 }}
+              className="h-full rounded-full bg-gradient-to-r from-primary to-[oklch(0.7_0.25_305)]"
+            />
           </div>
-          {currentField && (
-            <Badge variant="secondary" className="text-xs gap-1 shrink-0">
-              <Sparkles className="h-3 w-3" />
-              {currentField}
-            </Badge>
-          )}
         </div>
 
-        {/* Live streamed text */}
-        <div
-          ref={scrollRef}
-          className="flex-1 overflow-y-auto scrollbar-thin p-5 min-h-[200px] max-h-[400px]"
-        >
-          {hasText ? (
-            <pre className="text-xs font-mono text-foreground/80 whitespace-pre-wrap break-words leading-relaxed">
-              {streamedText}
-              <motion.span
-                animate={{ opacity: [1, 0, 1] }}
-                transition={{ duration: 0.8, repeat: Infinity }}
-                className="inline-block w-2 h-3.5 bg-primary ml-0.5 align-text-bottom rounded-sm"
-              />
-            </pre>
-          ) : (
-            <div className="space-y-2.5">
-              {steps.map((step, i) => {
-                const active = elapsed >= step.delay
-                const current = active && elapsed < (steps[i + 1]?.delay ?? Infinity)
-                return (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0.3 }}
-                    animate={{ opacity: active ? 1 : 0.3 }}
-                    transition={{ duration: 0.4 }}
-                    className="flex items-center gap-2.5 text-xs"
-                  >
-                    {current ? (
-                      <Loader2 className="h-3.5 w-3.5 animate-spin text-primary shrink-0" />
-                    ) : active ? (
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                    ) : (
-                      <div className="h-3.5 w-3.5 rounded-full border border-muted-foreground/30 shrink-0" />
-                    )}
-                    <span className={active ? 'text-foreground' : 'text-muted-foreground'}>
-                      {step.label}
-                    </span>
-                  </motion.div>
-                )
-              })}
+        {/* Two-panel layout: JSON stream + rendered preview */}
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 min-h-0">
+          {/* Left: raw JSON stream */}
+          <div className="border-r border-border/40 flex flex-col min-h-0">
+            <div className="px-4 py-2 border-b border-border/30 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold shrink-0">
+              Raw stream
             </div>
-          )}
+            <div
+              ref={jsonScrollRef}
+              className="flex-1 overflow-y-auto scrollbar-thin p-4 min-h-[150px]"
+            >
+              {hasText ? (
+                <pre className="text-[11px] font-mono text-foreground/70 whitespace-pre-wrap break-words leading-relaxed">
+                  {streamedText}
+                  <motion.span
+                    animate={{ opacity: [1, 0, 1] }}
+                    transition={{ duration: 0.8, repeat: Infinity }}
+                    className="inline-block w-1.5 h-3 bg-primary ml-0.5 align-text-bottom rounded-sm"
+                  />
+                </pre>
+              ) : (
+                <div className="space-y-2.5">
+                  {steps.map((step, i) => {
+                    const active = elapsed >= step.delay
+                    const current = active && elapsed < (steps[i + 1]?.delay ?? Infinity)
+                    return (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0.3 }}
+                        animate={{ opacity: active ? 1 : 0.3 }}
+                        transition={{ duration: 0.4 }}
+                        className="flex items-center gap-2.5 text-xs"
+                      >
+                        {current ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin text-primary shrink-0" />
+                        ) : active ? (
+                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                        ) : (
+                          <div className="h-3.5 w-3.5 rounded-full border border-muted-foreground/30 shrink-0" />
+                        )}
+                        <span className={active ? 'text-foreground' : 'text-muted-foreground'}>
+                          {step.label}
+                        </span>
+                      </motion.div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right: progressive rendered preview */}
+          <div className="flex flex-col min-h-0">
+            <div className="px-4 py-2 border-b border-border/30 text-[10px] uppercase tracking-wider text-muted-foreground font-semibold shrink-0 flex items-center justify-between">
+              <span>Live preview</span>
+              {populatedCount > 0 && (
+                <span className="text-emerald-500 font-bold">{populatedCount}/{TOTAL_AI_FIELDS}</span>
+              )}
+            </div>
+            <div
+              ref={previewScrollRef}
+              className="flex-1 overflow-y-auto scrollbar-thin p-4 min-h-[150px]"
+            >
+              {populatedCount === 0 ? (
+                <div className="text-xs text-muted-foreground text-center py-8">
+                  Waiting for first field…
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {partial.developerLevel && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-xs"
+                    >
+                      <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Level</span>
+                      <div className="font-semibold text-sm gradient-text mt-0.5">{partial.developerLevel}</div>
+                    </motion.div>
+                  )}
+                  {partial.executiveSummary && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-xs"
+                    >
+                      <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Summary</span>
+                      <p className="mt-0.5 leading-relaxed text-foreground/80">{partial.executiveSummary}</p>
+                    </motion.div>
+                  )}
+                  {partial.strengths && partial.strengths.length > 0 && (
+                    <ProgressiveList label="Strengths" items={partial.strengths} color="oklch(0.72 0.19 165)" />
+                  )}
+                  {partial.weaknesses && partial.weaknesses.length > 0 && (
+                    <ProgressiveList label="Weaknesses" items={partial.weaknesses} color="oklch(0.78 0.17 85)" />
+                  )}
+                  {partial.careerSuggestions && partial.careerSuggestions.length > 0 && (
+                    <ProgressiveList label="Career" items={partial.careerSuggestions} color="oklch(0.72 0.19 265)" />
+                  )}
+                  {partial.githubImprovements && partial.githubImprovements.length > 0 && (
+                    <ProgressiveList label="GitHub" items={partial.githubImprovements} color="oklch(0.7 0.25 305)" />
+                  )}
+                  {partial.learningRoadmap && partial.learningRoadmap.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-xs"
+                    >
+                      <span className="text-muted-foreground uppercase tracking-wider text-[10px]">Roadmap</span>
+                      <div className="mt-1 space-y-1">
+                        {partial.learningRoadmap.map((p, i) => (
+                          <div key={i} className="text-foreground/70">
+                            <span className="font-semibold">{p.phase}</span>
+                            {p.items.length > 0 && <span className="text-muted-foreground"> · {p.items.length} items</span>}
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Footer */}
@@ -416,6 +503,29 @@ function AiGeneratingOverlay({ streamedText }: { streamedText: string }) {
           Generated from public data only · No private information accessed
         </div>
       </motion.div>
+    </motion.div>
+  )
+}
+
+/** Renders a list of strings progressively as they arrive. */
+function ProgressiveList({ label, items, color }: { label: string; items: string[]; color: string }) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="text-xs">
+      <span className="text-muted-foreground uppercase tracking-wider text-[10px]">{label}</span>
+      <ul className="mt-1 space-y-1">
+        {items.map((item, i) => (
+          <motion.li
+            key={i}
+            initial={{ opacity: 0, x: -4 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: i * 0.05 }}
+            className="flex items-start gap-1.5 text-foreground/80"
+          >
+            <span className="h-1 w-1 rounded-full mt-1.5 shrink-0" style={{ background: color }} />
+            <span className="leading-snug">{item}</span>
+          </motion.li>
+        ))}
+      </ul>
     </motion.div>
   )
 }
