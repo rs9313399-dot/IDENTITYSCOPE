@@ -67,7 +67,7 @@ export default function RootLayout({
               {children}
             </AccentColorProvider>
             <Toaster />
-            <SonnerToaster position="bottom-right" richColors closeButton />
+            <SonnerToaster position="top-right" richColors closeButton />
           </QueryProvider>
         </ThemeProvider>
       </body>

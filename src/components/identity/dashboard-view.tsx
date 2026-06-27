@@ -9,6 +9,7 @@ import {
   Users,
   Star,
   GitFork,
+  GitCompareArrows,
   BookOpen,
   Trophy,
   AlertTriangle,
@@ -49,6 +50,7 @@ import { useAiReportStream, useScan } from '@/hooks/use-scan'
 import { DashboardSkeleton } from '@/components/identity/skeletons'
 import { EmptyState } from '@/components/identity/empty-states'
 import { ShareModal } from '@/components/identity/share-modal'
+import { DiffModal } from '@/components/identity/diff-modal'
 import {
   ScoreRadar,
   LanguagePie,
@@ -90,6 +92,7 @@ export function DashboardView() {
   const aiReport = useAiReportStream()
   const scan = useScan()
   const [shareOpen, setShareOpen] = React.useState(false)
+  const [diffOpen, setDiffOpen] = React.useState(false)
 
   // Show skeleton while a scan is in progress and no report yet
   if (scan.isPending && !report) {
@@ -164,6 +167,9 @@ export function DashboardView() {
           <div className="flex items-center gap-2 no-print">
             <Button variant="outline" size="sm" onClick={handleBookmark}>
               <Bookmark className="h-3.5 w-3.5 mr-1.5" /> Save
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => setDiffOpen(true)} title="Compare with past scans">
+              <GitCompareArrows className="h-3.5 w-3.5 mr-1.5" /> Diff
             </Button>
             <Button variant="outline" size="sm" onClick={handleShare}>
               <Share2 className="h-3.5 w-3.5 mr-1.5" /> Share
@@ -336,6 +342,8 @@ export function DashboardView() {
 
       {/* Share modal */}
       <ShareModal open={shareOpen} onClose={() => setShareOpen(false)} report={report} />
+      {/* Diff modal */}
+      <DiffModal open={diffOpen} onClose={() => setDiffOpen(false)} currentReport={report} />
     </div>
   )
 }

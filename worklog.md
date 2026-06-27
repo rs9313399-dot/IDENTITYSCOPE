@@ -497,3 +497,58 @@ Unresolved / next-phase recommendations:
 5. **Scan retry individual connectors**: retry button on failed connectors.
 6. **Custom connector builder**: UI for users to add their own public API connectors.
 7. **Command palette scan history**: show recent scans as quick actions in the palette.
+
+---
+Task ID: cron-9
+Agent: webDevReview (cron job 235654)
+Task: Ninth recurring 15-min review — QA via agent-browser, continue styling polish + new features.
+
+Work Log:
+- Read /home/z/my-project/worklog.md — Phase 1 + cron-1/2/3/4/5/6/7/8 complete. Previous rounds: README fix, real contribution calendar, HN+GitLab+Mastodon connectors, Quick Insights, score tooltips, landing rewrite, compare winner badges, skeleton loaders, AI streaming overlay, enhanced empty states, keyboard shortcuts, progressive AI rendering, accessibility audit, lazy-load Recharts, share modal, Markdown/JSON export, real-time scan progress, onboarding tour, theme customization, command palette.
+- Checked dev.log — server healthy, no errors. Lint clean.
+- Ran agent-browser QA on dashboard after scan — VLM noted toast overlapping radar chart.
+- Selected 3 items: report diffing (#2 priority), command palette scan history (#7 priority), toast position fix.
+
+Implemented changes:
+1. **New feature — Report diffing (compare over time)** (`src/components/identity/diff-modal.tsx` + `src/components/identity/dashboard-view.tsx`):
+   - New `DiffModal` component that compares the current report against a past scan of the same query.
+   - Uses `useHistory(query)` to fetch scans with matching query.
+   - Past scan selector with date/score for each option.
+   - `DiffResults` component shows:
+     - Time range header (past date → now, with "X days apart" badge).
+     - 10 score diff cards with delta indicators (▲ green for improvements, ▼ red for declines, − for flat), showing current value + "was X".
+     - GitHub stats diff (followers, stars, forks, contributions) with deltas.
+     - Verdict card summarizing improvements and declines.
+   - "Diff" button added to the dashboard header (between Save and Share).
+   - Empty state when fewer than 2 scans exist for the query.
+   - Verified: opened diff modal for torvalds, showed past scan list, selected one, displayed score cards with deltas + "was X" comparisons + time range.
+
+2. **New feature — Command palette scan history** (`src/components/identity/command-palette.tsx`):
+   - Added "Recent scans" group to the command palette showing the 8 most recent scans.
+   - Each item shows the query, score, and date.
+   - Selecting a history item loads the full report and navigates to the dashboard.
+   - Uses `useHistory()` to fetch recent scans and `loadScanById()` to load the full report.
+   - Added "history" to groupLabels and groups.
+   - Verified: searching "torvalds" shows both "Quick scans: Scan torvalds" and "Recent scans: torvalds (Score 62), torvalds (Score 59), torvalds (Score 63)".
+
+3. **Polish — Toast position fix** (`src/app/layout.tsx`):
+   - Moved Sonner toaster from `bottom-right` to `top-right` to avoid overlapping the radar chart and other dashboard content.
+   - VLM had noted the "Scan complete" toast was obscuring the "Developer" dimension label on the radar chart.
+
+Stage Summary:
+- All changes lint clean (`bun run lint` passes).
+- Dev server healthy on port 3000 (HTTP 200).
+- Verified end-to-end via agent-browser + VLM:
+  - Diff modal: opens with "Compare over time" title, lists past scans with dates/scores, selecting one shows score cards with deltas + "was X" + time range + verdict.
+  - Command palette: searching "torvalds" shows Recent scans group with 3 past torvalds scans (scores 62, 59, 63) alongside Quick scans.
+  - Toast: moved to top-right (no longer overlaps charts).
+- Report diffing lets users track how a digital identity evolves over time — a key analytics feature for the SaaS.
+
+Unresolved / next-phase recommendations:
+1. **Print/PDF polish**: verify SVG charts render correctly in print; dedicated PDF generation route.
+2. **More connectors**: Twitch, YouTube channel lookup, GitLab repo analysis.
+3. **Compare history**: save compare results for re-viewing later.
+4. **Scan retry individual connectors**: retry button on failed connectors.
+5. **Custom connector builder**: UI for users to add their own public API connectors.
+6. **Diff visualization chart**: a radar chart overlay showing past vs current scores.
+7. **Scheduled re-scans**: let users schedule automatic re-scans to build diff history.

@@ -20,6 +20,7 @@ import {
   AtSign,
 } from 'lucide-react'
 import { useAppStore, type View } from '@/stores/app-store'
+import { useHistory, loadScanById } from '@/hooks/use-scan'
 import { cn } from '@/lib/utils'
 
 interface CommandItem {
@@ -28,7 +29,7 @@ interface CommandItem {
   desc: string
   icon: React.ElementType
   action: () => void
-  group: 'navigate' | 'scan' | 'examples'
+  group: 'navigate' | 'scan' | 'examples' | 'history'
   keywords?: string
 }
 
@@ -55,6 +56,8 @@ export function CommandPalette({
 
   // Scan mutation via the store — we just navigate to scanner with the query
   const scan = useAppStore((s) => s.setView)
+  const setCurrentReport = useAppStore((s) => s.setCurrentReport)
+  const { data: historyData } = useHistory()
 
   const commands: CommandItem[] = React.useMemo(() => {
     const nav: CommandItem[] = [
@@ -86,8 +89,26 @@ export function CommandPalette({
       keywords: ex.type,
     }))
 
-    return [...nav, ...examples]
-  }, [setView, setLastInput, onClose])
+    // Recent scan history — open past reports directly
+    const history: CommandItem[] = (historyData?.scans ?? []).slice(0, 8).map((s) => ({
+      id: `history-${s.id}`,
+      label: s.query,
+      desc: `Score ${s.overallScore ?? '—'} · ${new Date(s.createdAt).toLocaleDateString()}`,
+      icon: History,
+      action: async () => {
+        const report = await loadScanById(s.id)
+        if (report) {
+          setCurrentReport(report)
+          setView('dashboard')
+        }
+        onClose()
+      },
+      group: 'history' as const,
+      keywords: s.queryType,
+    }))
+
+    return [...nav, ...examples, ...history]
+  }, [setView, setLastInput, onClose, historyData, setCurrentReport])
 
   const filtered = React.useMemo(() => {
     if (!query.trim()) return commands
@@ -140,7 +161,7 @@ export function CommandPalette({
 
   // Group filtered items
   const groups = React.useMemo(() => {
-    const g: Record<string, CommandItem[]> = { navigate: [], examples: [] }
+    const g: Record<string, CommandItem[]> = { navigate: [], examples: [], history: [] }
     for (const c of filtered) {
       if (!g[c.group]) g[c.group] = []
       g[c.group].push(c)
@@ -153,6 +174,7 @@ export function CommandPalette({
   const groupLabels: Record<string, string> = {
     navigate: 'Navigate',
     examples: 'Quick scans',
+    history: 'Recent scans',
   }
 
   return (
