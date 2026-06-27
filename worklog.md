@@ -724,3 +724,71 @@ Unresolved / next-phase recommendations:
 3. **History view**: style as archived case files (CASE #001, TARGET, DATE, STATUS: ARCHIVED).
 4. **Report view**: style as intelligence dossier with numbered sections.
 5. **Modals**: apply terminal-panel styling to share/diff/command-palette modals.
+
+---
+Task ID: premium-cyber-brutalism
+Agent: UI/UX Director + Senior Frontend Engineer
+Task: Elevate the cyber-brutalist UI to world-class, handcrafted quality with premium animations, asymmetrical layouts, and a reusable component library. All functionality preserved.
+
+Work Log:
+- Reviewed the existing cyber-brutalist foundation (terminal panels, scan logs, green accent).
+- Created a premium reusable primitive component library for consistency and scalability.
+- Added handcrafted animation system (glitch, stamp, scanline, typing, counter, border-draw).
+
+Implemented changes:
+
+1. **Premium primitive component library** (`src/components/brutal/primitives.tsx`):
+   - `BrutalButton` — 5 variants (default/accent/outline/ghost/danger), 3 sizes, hard hover translate.
+   - `BrutalInput` — terminal command field with optional `>` prefix, green focus border.
+   - `BrutalCard` — dossier data module with optional accent top strip + hover lift.
+   - `StatusBadge` — 6 status types (found/missing/weak/strong/archived/unknown) with stamped colors.
+   - `RiskBadge` — RISK: LOW/MEDIUM/HIGH tags.
+   - `ScoreMeter` — animated ASCII block meter `[████████░░░░] 78/100` with count-up + color coding (green/amber/red).
+   - `TerminalPanel` — dossier container with header strip + status + scroll-into-view reveal.
+   - `ScanLog` — terminal log line with timestamp + colored variant (ok/err/warn).
+   - `DossierSection` — numbered intelligence dossier section with header strip.
+   - `BrutalTable` — raw table with thick borders, uppercase headers, hover-invert rows.
+   - `TypingText` — terminal typing animation with blinking cursor.
+   - `CounterTick` — animated count-up with easeOutCubic.
+   - `BgText` — massive faded background typography.
+   - `AsciiSeparator` — horizontal ASCII divider.
+   - `ScanlineOverlay` — CRT scanline overlay.
+
+2. **Premium animation CSS** (`src/app/globals.css`):
+   - `.brutal-glitch` — glitch border effect on hover (two offset animated borders).
+   - `.brutal-stamp` — stamp-in animation (scale + rotate) for status badges.
+   - `.brutal-border-draw` — border draw-on hover effect.
+   - `.scanline-pass` — green scanline that travels down the screen every 8s.
+   - `grid-move` — subtle 60s grid movement on body.
+   - `.noise-overlay` — SVG fractal noise texture overlay (0.015 opacity).
+   - `.terminal-wipe` — clip-path wipe reveal.
+   - `@media (prefers-reduced-motion)` — disables all animations for accessibility.
+
+3. **Page-level polish** (`src/app/page.tsx`):
+   - Added `noise-overlay` class to root div.
+   - Added `<div className="scanline-pass">` for the traveling scanline.
+   - Page transitions upgraded to horizontal slide (x: 12 → 0, exit x: -8) for a more cinematic feel.
+
+4. **Landing page hero upgrade** (`src/components/identity/landing-view.tsx`):
+   - Replaced static terminal preview with `AnimatedTerminalPreview` component.
+   - Terminal types out scan lines sequentially (TARGET → GITHUB → CODEFORCES → DEV.TO → PORTFOLIO → NPM → SCORE) with 400ms stagger.
+   - Blinking cursor while scanning, then reveals ASCII score meter `[████████████████░░░░░░░░] 78/100`.
+   - Each line slides in from the left with color-coded status (green FOUND, gray NOT_FOUND, amber WEAK_SIGNAL).
+   - "LIVE" badge in the terminal header.
+
+Stage Summary:
+- All changes lint clean (`bun run lint` passes).
+- Dev server healthy on port 3000 (HTTP 200).
+- Verified via agent-browser + VLM:
+  - Landing: animated terminal preview types out scan lines sequentially with blinking cursor, green scanline pass effect across the screen, massive uppercase headline, noise texture overlay.
+  - Scanner: terminal scan log overlay with [00:00] timestamps, ASCII block progress bar (█░ in green), colored status entries.
+  - Dashboard: cyber-brutalist dossier with score ring, terminal panels, green/amber/red score cards, monospace labels, status tags — feels premium and handcrafted.
+  - Reduced-motion support for accessibility.
+- ALL functionality preserved: scanning, AI streaming, compare, history, bookmarks, settings, share/diff modals, command palette, keyboard shortcuts, onboarding tour, accent picker.
+
+Unresolved / next-phase recommendations:
+1. **Migrate dashboard sections to DossierSection**: convert existing dashboard cards to use the new `DossierSection` + `StatusBadge` + `ScoreMeter` primitives for full consistency.
+2. **Compare view**: style as "DEVELOPER VS DEVELOPER" battle card with `StatusBadge` winner stamps.
+3. **History view**: style as archived case files (CASE #001) with `StatusBadge` archived tags.
+4. **Report view**: convert to numbered `DossierSection` layout (01 TARGET SUMMARY → 10 RAW API DATA).
+5. **Modals**: apply `TerminalPanel` styling to share/diff/command-palette modals.

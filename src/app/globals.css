@@ -589,3 +589,132 @@
     border: 1px solid #000 !important;
   }
 }
+
+/* ============================================================
+   PREMIUM ANIMATION SYSTEM — handcrafted, intentional, controlled
+   ============================================================ */
+
+/* Glitch border effect for primary CTA */
+.brutal-glitch {
+  position: relative;
+}
+.brutal-glitch::before,
+.brutal-glitch::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 2px solid var(--accent);
+  opacity: 0;
+  pointer-events: none;
+}
+.brutal-glitch:hover::before {
+  opacity: 1;
+  animation: glitch-1 0.3s steps(2) infinite;
+}
+.brutal-glitch:hover::after {
+  opacity: 1;
+  animation: glitch-2 0.3s steps(2) infinite;
+}
+@keyframes glitch-1 {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-2px, 1px); }
+  50% { transform: translate(1px, -1px); }
+  75% { transform: translate(-1px, -1px); }
+}
+@keyframes glitch-2 {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(1px, -1px); }
+  50% { transform: translate(-1px, 1px); }
+  75% { transform: translate(2px, 1px); }
+}
+
+/* Stamp-in animation for status badges */
+.brutal-stamp {
+  animation: stamp-in 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes stamp-in {
+  0% { transform: scale(1.4) rotate(-3deg); opacity: 0; }
+  60% { transform: scale(0.95) rotate(1deg); }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+/* Border draw animation */
+.brutal-border-draw {
+  position: relative;
+}
+.brutal-border-draw::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--accent);
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+}
+.brutal-border-draw:hover::after {
+  opacity: 1;
+}
+
+/* Scanline pass animation */
+@keyframes scanline-pass {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+.scanline-pass {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 99;
+  animation: scanline-pass 8s linear infinite;
+}
+
+/* Subtle moving grid */
+@keyframes grid-move {
+  0% { background-position: 0 0; }
+  100% { background-position: 32px 32px; }
+}
+body {
+  animation: grid-move 60s linear infinite;
+}
+
+/* Noise texture overlay */
+.noise-overlay::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' /%3E%3C/svg%3E");
+}
+
+/* Terminal wipe reveal */
+@keyframes terminal-wipe {
+  0% { clip-path: inset(0 100% 0 0); }
+  100% { clip-path: inset(0 0 0 0); }
+}
+.terminal-wipe {
+  animation: terminal-wipe 0.4s ease-out;
+}
+
+/* ============================================================
+   REDUCED MOTION — accessibility
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .cursor-blink { animation: none; opacity: 1; }
+  .scanline-pass { display: none; }
+  body { animation: none; }
+}

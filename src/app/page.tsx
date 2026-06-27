@@ -35,16 +35,18 @@ export default function Home() {
   }, [])
 
   return (
-    <div className="relative min-h-screen flex flex-col">
+    <div className="relative min-h-screen flex flex-col noise-overlay">
+      {/* Premium background: scanline pass + grid */}
+      <div className="scanline-pass" aria-hidden />
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 relative">
         <AnimatePresence mode="wait">
           <motion.div
             key={view}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -4 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ opacity: 0, x: 12 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -8 }}
+            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
           >
             {view === 'landing' && <LandingView />}
             {view === 'scanner' && <ScannerView />}

@@ -139,32 +139,13 @@ export function LandingView() {
               </motion.div>
             </div>
 
-            {/* Right — terminal preview box */}
+            {/* Right — terminal preview box with animated typing scan log */}
             <motion.div
               initial={{ opacity: 0, x: 12 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
             >
-              <TerminalPanel
-                label="IDENTITYSCOPE_AI"
-                status={<StatusTag status="found">SCAN_PREVIEW</StatusTag>}
-              >
-                <div className="font-mono text-xs space-y-1.5">
-                  <div className="text-muted-foreground">{'┌─────────────────────────────┐'}</div>
-                  <div className="flex"><span className="text-muted-foreground">│ </span><span className="text-accent">TARGET:</span><span className="ml-1">ratnesh</span></div>
-                  <div className="flex"><span className="text-muted-foreground">│ </span><span>GITHUB:</span><span className="ml-1 text-accent font-bold">FOUND</span></div>
-                  <div className="flex"><span className="text-muted-foreground">│ </span><span>CODEFORCES:</span><span className="ml-1 text-accent font-bold">FOUND</span></div>
-                  <div className="flex"><span className="text-muted-foreground">│ </span><span>DEV.TO:</span><span className="ml-1 text-muted-foreground">NOT_FOUND</span></div>
-                  <div className="flex"><span className="text-muted-foreground">│ </span><span>PORTFOLIO:</span><span className="ml-1" style={{color:'#FFD60A'}}>WEAK_SIGNAL</span></div>
-                  <div className="flex"><span className="text-muted-foreground">│ </span><span>NPM:</span><span className="ml-1 text-accent font-bold">3 PKGS</span></div>
-                  <div className="flex"><span className="text-muted-foreground">│ </span><span>SCORE:</span><span className="ml-1 text-accent font-bold">78/100</span></div>
-                  <div className="text-muted-foreground">{'└─────────────────────────────┘'}</div>
-                  <div className="pt-2 flex items-center gap-1 text-accent">
-                    <span className="cursor-blink" />
-                    <span className="text-muted-foreground">awaiting_input_</span>
-                  </div>
-                </div>
-              </TerminalPanel>
+              <AnimatedTerminalPreview />
             </motion.div>
           </div>
 
@@ -421,6 +402,96 @@ export function LandingView() {
           </div>
         </Reveal>
       </section>
+    </div>
+  )
+}
+
+/* ----------------------------- Animated Terminal Preview ----------------------------- */
+
+const SCAN_LINES = [
+  { delay: 600, text: 'TARGET: ratnesh', color: 'text-accent' },
+  { delay: 1000, text: 'GITHUB: FOUND', color: 'text-accent font-bold' },
+  { delay: 1400, text: 'CODEFORCES: FOUND', color: 'text-accent font-bold' },
+  { delay: 1800, text: 'DEV.TO: NOT_FOUND', color: 'text-muted-foreground' },
+  { delay: 2200, text: 'PORTFOLIO: WEAK_SIGNAL', color: 'text-[#FFD60A]' },
+  { delay: 2600, text: 'NPM: 3 PKGS', color: 'text-accent font-bold' },
+  { delay: 3000, text: 'SCORE: 78/100', color: 'text-accent font-bold' },
+]
+
+function AnimatedTerminalPreview() {
+  const [visibleLines, setVisibleLines] = React.useState(0)
+  const [scoreRevealed, setScoreRevealed] = React.useState(false)
+
+  React.useEffect(() => {
+    const timers = SCAN_LINES.map((line, i) =>
+      setTimeout(() => setVisibleLines(i + 1), line.delay)
+    )
+    const scoreTimer = setTimeout(() => setScoreRevealed(true), 3400)
+    return () => { timers.forEach(clearTimeout); clearTimeout(scoreTimer) }
+  }, [])
+
+  return (
+    <div className="relative bg-[#0A0A0A] border-2 border-border">
+      {/* Header strip */}
+      <div className="flex items-center justify-between bg-foreground text-background px-3 py-1.5 border-b-2 border-border">
+        <span className="font-mono text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+          <span className="inline-block h-1.5 w-1.5 bg-accent animate-pulse" />
+          IDENTITYSCOPE_AI
+        </span>
+        <span className="font-mono text-[9px] font-bold uppercase tracking-widest bg-accent text-background px-1.5 py-0.5">
+          LIVE
+        </span>
+      </div>
+
+      <div className="p-4 font-mono text-xs">
+        {/* ASCII top border */}
+        <div className="text-muted-foreground/40">{'┌─────────────────────────────┐'}</div>
+
+        {/* Scan lines — reveal sequentially */}
+        <div className="min-h-[180px]">
+          {SCAN_LINES.slice(0, visibleLines).map((line, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: -6 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.15 }}
+              className="flex"
+            >
+              <span className="text-muted-foreground/40">│ </span>
+              <span className={line.color}>{line.text}</span>
+            </motion.div>
+          ))}
+
+          {/* Blinking cursor while scanning */}
+          {visibleLines < SCAN_LINES.length && (
+            <div className="flex items-center gap-1 mt-1">
+              <span className="text-muted-foreground/40">│ </span>
+              <span className="cursor-blink" />
+              <span className="text-muted-foreground">scanning_</span>
+            </div>
+          )}
+
+          {/* ASCII bottom border + score meter */}
+          {scoreRevealed && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="text-muted-foreground/40">{'└─────────────────────────────┘'}</div>
+              <div className="mt-3 pt-3 border-t border-border">
+                <div className="text-[9px] uppercase tracking-widest text-muted-foreground mb-1 font-bold">REPUTATION_SCORE</div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] text-accent tracking-tight">
+                    [{'█'.repeat(16)}{'░'.repeat(8)}]
+                  </span>
+                  <span className="text-accent font-bold tabular-nums">78/100</span>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
