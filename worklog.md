@@ -552,3 +552,94 @@ Unresolved / next-phase recommendations:
 5. **Custom connector builder**: UI for users to add their own public API connectors.
 6. **Diff visualization chart**: a radar chart overlay showing past vs current scores.
 7. **Scheduled re-scans**: let users schedule automatic re-scans to build diff history.
+
+---
+Task ID: brutalist-redesign
+Agent: UI/UX Designer (Brutalism)
+Task: Complete Brutalist UI redesign — transform the entire IdentityScope AI interface into authentic Digital Brutalism while keeping ALL functionality, APIs, and backend intact.
+
+Work Log:
+- Reviewed the existing design system (glassmorphism, gradients, aurora effects, rounded corners, multi-color palette).
+- Identified all decorative CSS classes to override: `.glass`, `.glass-strong`, `.gradient-text`, `.glow`, `.glow-primary`, `.aurora`, `.bg-grid`, `.bg-dots`, `.shimmer`.
+- Chose accent color: #FF3B30 (red) as default — aggressive, forensic, fits the "identity scanner" theme.
+
+Implemented changes:
+
+1. **Complete CSS token overhaul** (`src/app/globals.css`):
+   - Set `--radius: 0px` and all radius variants (sm/md/lg/xl) to 0px.
+   - Light theme: pure white bg (#FFFFFF), black text (#000000), #E5E5E5 secondary, #FF3B30 accent.
+   - Dark theme: pure black bg (#000000), white text (#FFFFFF), #1A1A1A secondary, #FF3B30 accent.
+   - Nuclear override: `* { border-radius: 0 !important }` — kills ALL rounded corners globally.
+   - Redefined `.glass` / `.glass-strong` → solid boxes with 2px/3px black borders (no blur, no transparency).
+   - Redefined `.gradient-text` → solid `var(--accent)` (no gradients in brutalism).
+   - Redefined `.glow` / `.glow-primary` → `box-shadow: none` (no soft shadows).
+   - Redefined `.aurora` → `display: none` (no decorative blurs).
+   - Redefined `.bg-grid` → hard visible grid lines.
+   - Added brutalist utility classes: `.btn-brutal`, `.input-brutal`, `.card-brutal`, `.badge-brutal`, `.label-brutal`, `.shadow-brutal` (hard offset shadow).
+   - Visible focus states: 3px solid accent outline.
+   - Headings: uppercase, bold, compressed letter-spacing, tight line-height.
+   - Scrollbar: blocky, 8px, black thumb.
+
+2. **Font system** (`src/app/layout.tsx`):
+   - Switched from Geist to **Space Grotesk** (grotesk sans) + **JetBrains Mono** (monospace).
+   - Space Grotesk for headings/body, JetBrains Mono for labels/data/code.
+   - Updated metadata title to "IDENTITYSCOPE AI // DIGITAL IDENTITY SCANNER".
+
+3. **Accent color system** (`src/stores/app-store.ts` + `src/components/accent-color-provider.tsx`):
+   - Replaced 5 pastel accent colors with 3 brutalist accents: **Red** (#FF3B30), **Yellow** (#FFD60A), **Green** (#00FF66).
+   - Default: Red.
+   - Provider now sets `--accent`, `--accent-foreground` (black for yellow, white for red/green), `--destructive`, `--chart-2`, `--ring`.
+
+4. **Header** (`src/components/identity/header.tsx`):
+   - Sticky, white/black bg, 3px black border-bottom.
+   - Logo: square box with thick border, "IdentityScope" + "// AI" in accent.
+   - Nav: inline buttons, active state = inverted (black bg, white text).
+   - Buttons: square, thick border, hover invert.
+   - Mobile nav: 2-col blocky grid with borders.
+
+5. **Landing page** (`src/components/identity/landing-view.tsx`):
+   - Hero: massive 7rem uppercase headline, accent highlight word.
+   - Stats: editorial 4-col grid with visible borders between cells.
+   - Input types: 4-col bordered grid, hover invert.
+   - How it works: numbered steps with oversized step numbers.
+   - Features: 4-col bordered grid.
+   - Score dimensions: 2-col numbered grid.
+   - Connectors: inline bordered tags.
+   - CTA: massive bordered box.
+   - All sections separated by 3px borders with `// 01 — Input` editorial labels.
+
+6. **Scanner** (`src/components/identity/scanner-view.tsx`):
+   - Mode tabs: blocky inline buttons with 3px borders.
+   - Form: thick-bordered container, uppercase placeholders, monospace inputs.
+   - Scan button: accent bg, hover invert.
+   - Examples: inline bordered tags.
+   - Scanning overlay: brutalist progress bar (accent fill), connector list with bordered rows, uppercase status labels.
+
+7. **Charts** (`src/components/charts/index.tsx` + `src/components/charts/animated.tsx`):
+   - All charts: monochrome (black/white) + single accent color.
+   - Radar: accent stroke/fill, monospace uppercase axis labels.
+   - Pie: black/accent/gray palette, thick borders.
+   - Bar: accent + foreground bars, no rounded corners.
+   - Area: accent stroke with subtle gradient fill.
+   - Heatmap: accent with opacity levels, bordered cells.
+   - ProgressRing: butt linecap (sharp), no drop-shadow, 3xl bold number.
+   - `scoreColor()`: returns accent for high (>=75), foreground for mid (>=40), muted for low.
+   - `scoreLabel()`: uppercase (EXCELLENT/STRONG/GOOD/FAIR/WEAK/CRITICAL).
+
+Stage Summary:
+- All changes lint clean (`bun run lint` passes).
+- Dev server healthy on port 3000 (HTTP 200).
+- Verified via agent-browser + VLM:
+  - Landing: brutalist with red accent, massive 7rem headline, editorial grid sections, sharp corners, thick borders, no gradients/glassmorphism.
+  - Scanner: brutalist form with uppercase placeholders, monospace inputs, blocky tabs.
+  - Dashboard: brutalist score cards (square, thick borders, monochrome+red), radar chart monochrome with red accent, massive typography.
+  - Mobile (375px): responsive brutalist layout.
+- ALL functionality preserved: scanning, AI streaming, compare, history, bookmarks, settings, share modal, diff modal, command palette, keyboard shortcuts, onboarding tour, accent color picker.
+- The global `border-radius: 0 !important` and redefined utility classes (`.glass` → solid, `.gradient-text` → accent, `.glow` → none, `.aurora` → hidden) automatically brutalize all remaining views without editing each file.
+
+Unresolved / next-phase recommendations:
+1. **Fine-tune dashboard cards**: some inline styles using oklch colors (e.g., insight card backgrounds, stat card colors) could be converted to CSS variables for full monochrome consistency.
+2. **Compare view**: verify winner badges and metric rows render brutalist.
+3. **Modals**: share/diff/command palette modals use `.glass-strong` which is now brutalist, but could be refined further.
+4. **About page**: verify the principles/API list render brutalist.
+5. **Print styles**: verify brutalist print output.

@@ -23,45 +23,67 @@ import type { ScoreSet, GitHubLanguageStat, ContributionWeek } from '@/lib/types
 import { useTheme } from 'next-themes'
 
 const RADAR_KEYS: { key: keyof ScoreSet; label: string }[] = [
-  { key: 'developer', label: 'Developer' },
-  { key: 'portfolio', label: 'Portfolio' },
-  { key: 'openSource', label: 'Open Source' },
-  { key: 'repository', label: 'Repository' },
-  { key: 'documentation', label: 'Docs' },
-  { key: 'consistency', label: 'Consistency' },
-  { key: 'security', label: 'Security' },
-  { key: 'community', label: 'Community' },
-  { key: 'brand', label: 'Brand' },
+  { key: 'developer', label: 'DEV' },
+  { key: 'portfolio', label: 'PORT' },
+  { key: 'openSource', label: 'OSS' },
+  { key: 'repository', label: 'REPO' },
+  { key: 'documentation', label: 'DOCS' },
+  { key: 'consistency', label: 'CONS' },
+  { key: 'security', label: 'SEC' },
+  { key: 'community', label: 'COMM' },
+  { key: 'brand', label: 'BRAND' },
 ]
 
-export function ScoreRadar({ scores }: { scores: ScoreSet }) {
+function useChartColors() {
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
+  return {
+    isDark,
+    fg: isDark ? '#FFFFFF' : '#000000',
+    bg: isDark ? '#000000' : '#FFFFFF',
+    muted: isDark ? '#888888' : '#555555',
+    grid: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)',
+    tick: isDark ? 'rgba(255,255,255,0.85)' : 'rgba(0,0,0,0.85)',
+    accent: typeof window !== 'undefined'
+      ? getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#FF3B30'
+      : '#FF3B30',
+    secondary: isDark ? '#555555' : '#999999',
+    tooltipBg: isDark ? '#000000' : '#FFFFFF',
+    tooltipBorder: isDark ? '#FFFFFF' : '#000000',
+  }
+}
+
+export function ScoreRadar({ scores }: { scores: ScoreSet }) {
+  const c = useChartColors()
   const data = RADAR_KEYS.map(({ key, label }) => ({ subject: label, value: scores[key] }))
   return (
     <ResponsiveContainer width="100%" height={300}>
       <RadarChart data={data} outerRadius="72%">
-        <PolarGrid stroke={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'} />
+        <PolarGrid stroke={c.grid} strokeWidth={1} />
         <PolarAngleAxis
           dataKey="subject"
-          tick={{ fill: isDark ? 'rgba(255,255,255,0.65)' : 'rgba(0,0,0,0.6)', fontSize: 11 }}
+          tick={{ fill: c.tick, fontSize: 10, fontWeight: 700, fontFamily: 'monospace' }}
         />
         <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
         <Radar
           name="Score"
           dataKey="value"
-          stroke="oklch(0.72 0.19 265)"
-          fill="oklch(0.72 0.19 265)"
-          fillOpacity={0.35}
+          stroke={c.accent}
+          fill={c.accent}
+          fillOpacity={0.4}
           strokeWidth={2}
         />
         <Tooltip
           contentStyle={{
-            background: isDark ? 'rgba(20,20,28,0.95)' : 'rgba(255,255,255,0.95)',
-            border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-            borderRadius: 12,
-            fontSize: 12,
+            background: c.tooltipBg,
+            border: `2px solid ${c.tooltipBorder}`,
+            borderRadius: 0,
+            fontSize: 11,
+            fontFamily: 'monospace',
+            fontWeight: 700,
+            textTransform: 'uppercase',
           }}
+          labelStyle={{ color: c.fg }}
         />
       </RadarChart>
     </ResponsiveContainer>
@@ -69,9 +91,10 @@ export function ScoreRadar({ scores }: { scores: ScoreSet }) {
 }
 
 export function LanguagePie({ languages }: { languages: GitHubLanguageStat[] }) {
-  const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === 'dark'
-  const data = languages.slice(0, 8).map((l) => ({ name: l.language, value: l.percentage, color: l.color }))
+  const c = useChartColors()
+  // Brutalist: only black, accent, and grays. Map language colors to monochrome palette.
+  const palette = [c.fg, c.accent, c.muted, c.secondary, c.grid, c.fg, c.accent, c.muted]
+  const data = languages.slice(0, 8).map((l, i) => ({ name: l.language, value: l.percentage, color: palette[i % palette.length] }))
   if (data.length === 0) return null
   return (
     <ResponsiveContainer width="100%" height={260}>
@@ -84,8 +107,9 @@ export function LanguagePie({ languages }: { languages: GitHubLanguageStat[] }) 
           cy="50%"
           innerRadius={55}
           outerRadius={90}
-          paddingAngle={2}
-          stroke="none"
+          paddingAngle={0}
+          stroke={c.fg}
+          strokeWidth={2}
         >
           {data.map((d, i) => (
             <Cell key={i} fill={d.color} />
@@ -93,10 +117,13 @@ export function LanguagePie({ languages }: { languages: GitHubLanguageStat[] }) 
         </Pie>
         <Tooltip
           contentStyle={{
-            background: isDark ? 'rgba(20,20,28,0.95)' : 'rgba(255,255,255,0.95)',
-            border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-            borderRadius: 12,
-            fontSize: 12,
+            background: c.tooltipBg,
+            border: `2px solid ${c.tooltipBorder}`,
+            borderRadius: 0,
+            fontSize: 11,
+            fontFamily: 'monospace',
+            fontWeight: 700,
+            textTransform: 'uppercase',
           }}
           formatter={(v: number, n: string) => [`${v}%`, n]}
         />
@@ -110,10 +137,9 @@ export function RepoBarChart({
 }: {
   repos: { name: string; stars: number; forks: number }[]
 }) {
-  const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === 'dark'
+  const c = useChartColors()
   const data = repos.slice(0, 8).map((r) => ({
-    name: r.name.length > 12 ? r.name.slice(0, 11) + '…' : r.name,
+    name: r.name.length > 10 ? r.name.slice(0, 9) + '…' : r.name.toUpperCase(),
     Stars: r.stars,
     Forks: r.forks,
   }))
@@ -121,20 +147,23 @@ export function RepoBarChart({
   return (
     <ResponsiveContainer width="100%" height={260}>
       <BarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -16 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'} vertical={false} />
-        <XAxis dataKey="name" tick={{ fill: isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.55)', fontSize: 11 }} interval={0} angle={-25} textAnchor="end" height={56} />
-        <YAxis tick={{ fill: isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.55)', fontSize: 11 }} allowDecimals={false} />
+        <CartesianGrid strokeDasharray="0" stroke={c.grid} vertical={false} strokeWidth={1} />
+        <XAxis dataKey="name" tick={{ fill: c.tick, fontSize: 10, fontWeight: 700, fontFamily: 'monospace' }} interval={0} angle={-25} textAnchor="end" height={56} />
+        <YAxis tick={{ fill: c.tick, fontSize: 10, fontWeight: 700, fontFamily: 'monospace' }} allowDecimals={false} />
         <Tooltip
           contentStyle={{
-            background: isDark ? 'rgba(20,20,28,0.95)' : 'rgba(255,255,255,0.95)',
-            border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-            borderRadius: 12,
-            fontSize: 12,
+            background: c.tooltipBg,
+            border: `2px solid ${c.tooltipBorder}`,
+            borderRadius: 0,
+            fontSize: 11,
+            fontFamily: 'monospace',
+            fontWeight: 700,
+            textTransform: 'uppercase',
           }}
-          cursor={{ fill: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }}
+          cursor={{ fill: c.grid }}
         />
-        <Bar dataKey="Stars" fill="oklch(0.72 0.19 265)" radius={[4, 4, 0, 0]} maxBarSize={28} />
-        <Bar dataKey="Forks" fill="oklch(0.7 0.25 305)" radius={[4, 4, 0, 0]} maxBarSize={28} />
+        <Bar dataKey="Stars" fill={c.accent} radius={[0, 0, 0, 0]} maxBarSize={28} />
+        <Bar dataKey="Forks" fill={c.fg} radius={[0, 0, 0, 0]} maxBarSize={28} />
       </BarChart>
     </ResponsiveContainer>
   )
@@ -145,48 +174,43 @@ export function CommitActivityChart({
 }: {
   data: { day: string; commits: number }[]
 }) {
-  const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === 'dark'
+  const c = useChartColors()
   return (
     <ResponsiveContainer width="100%" height={220}>
       <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -20 }}>
         <defs>
           <linearGradient id="commitGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="oklch(0.72 0.19 265)" stopOpacity={0.7} />
-            <stop offset="100%" stopColor="oklch(0.72 0.19 265)" stopOpacity={0} />
+            <stop offset="0%" stopColor={c.accent} stopOpacity={0.8} />
+            <stop offset="100%" stopColor={c.accent} stopOpacity={0.1} />
           </linearGradient>
         </defs>
-        <CartesianGrid strokeDasharray="3 3" stroke={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'} vertical={false} />
-        <XAxis dataKey="day" tick={{ fill: isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.55)', fontSize: 11 }} />
-        <YAxis tick={{ fill: isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.55)', fontSize: 11 }} allowDecimals={false} />
+        <CartesianGrid strokeDasharray="0" stroke={c.grid} vertical={false} strokeWidth={1} />
+        <XAxis dataKey="day" tick={{ fill: c.tick, fontSize: 10, fontWeight: 700, fontFamily: 'monospace' }} />
+        <YAxis tick={{ fill: c.tick, fontSize: 10, fontWeight: 700, fontFamily: 'monospace' }} allowDecimals={false} />
         <Tooltip
           contentStyle={{
-            background: isDark ? 'rgba(20,20,28,0.95)' : 'rgba(255,255,255,0.95)',
-            border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'}`,
-            borderRadius: 12,
-            fontSize: 12,
+            background: c.tooltipBg,
+            border: `2px solid ${c.tooltipBorder}`,
+            borderRadius: 0,
+            fontSize: 11,
+            fontFamily: 'monospace',
+            fontWeight: 700,
           }}
         />
-        <Area type="monotone" dataKey="commits" stroke="oklch(0.72 0.19 265)" strokeWidth={2} fill="url(#commitGrad)" />
+        <Area type="monotone" dataKey="commits" stroke={c.accent} strokeWidth={2} fill="url(#commitGrad)" />
       </AreaChart>
     </ResponsiveContainer>
   )
 }
 
-const LEVEL_COLORS = [
-  'oklch(0.22 0.015 255 / 0.6)',
-  'oklch(0.72 0.19 265 / 0.45)',
-  'oklch(0.72 0.19 265 / 0.7)',
-  'oklch(0.72 0.19 265 / 0.85)',
-  'oklch(0.72 0.19 265)',
-]
-
 export function ContributionHeatmap({ weeks }: { weeks: ContributionWeek[] }) {
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
   if (!weeks || weeks.length === 0) return null
-  const monthLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-  // Compute month label positions
+  const accent = typeof window !== 'undefined'
+    ? getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#FF3B30'
+    : '#FF3B30'
+  const monthLabels = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
   const months: { label: string; index: number }[] = []
   let lastMonth = -1
   weeks.forEach((w, i) => {
@@ -200,25 +224,27 @@ export function ContributionHeatmap({ weeks }: { weeks: ContributionWeek[] }) {
     }
   })
 
+  const LEVEL_OPACITIES = [0.05, 0.3, 0.55, 0.8, 1]
+
   return (
     <div className="w-full overflow-x-auto scrollbar-thin">
       <div className="min-w-[640px]">
-        <div className="flex pl-7 mb-1">
+        <div className="flex pl-7 mb-1 relative h-4">
           {months.map((m, i) => (
             <div
               key={i}
-              className="text-[10px] text-muted-foreground"
-              style={{ position: 'absolute', left: `calc(1.75rem + ${m.index * 13}px)` }}
+              className="text-[10px] font-mono font-bold text-muted-foreground absolute"
+              style={{ left: `calc(1.75rem + ${m.index * 13}px)` }}
             >
               {m.label}
             </div>
           ))}
         </div>
         <div className="flex gap-[3px]">
-          <div className="flex flex-col gap-[3px] pr-1 justify-around text-[9px] text-muted-foreground">
-            <span>Mon</span>
-            <span>Wed</span>
-            <span>Fri</span>
+          <div className="flex flex-col gap-[3px] pr-1 justify-around text-[9px] font-mono font-bold text-muted-foreground">
+            <span>MON</span>
+            <span>WED</span>
+            <span>FRI</span>
           </div>
           <div className="flex gap-[3px]">
             {weeks.map((w, wi) => (
@@ -226,17 +252,16 @@ export function ContributionHeatmap({ weeks }: { weeks: ContributionWeek[] }) {
                 {w.days.map((d, di) => (
                   <div
                     key={di}
-                    className="heatmap-cell rounded-[2px]"
+                    className="heatmap-cell"
                     title={`${d.date}: ${d.count} contributions`}
                     style={{
                       width: 10,
                       height: 10,
-                      background:
-                        d.level === 0
-                          ? isDark
-                            ? 'rgba(255,255,255,0.06)'
-                            : 'rgba(0,0,0,0.06)'
-                          : LEVEL_COLORS[d.level],
+                      background: d.level === 0
+                        ? (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)')
+                        : accent,
+                      opacity: d.level === 0 ? 1 : LEVEL_OPACITIES[d.level],
+                      border: d.level > 0 ? '1px solid var(--border)' : 'none',
                     }}
                   />
                 ))}
@@ -244,20 +269,21 @@ export function ContributionHeatmap({ weeks }: { weeks: ContributionWeek[] }) {
             ))}
           </div>
         </div>
-        <div className="flex items-center justify-end gap-1 mt-2 text-[10px] text-muted-foreground">
-          <span>Less</span>
-          {LEVEL_COLORS.map((c, i) => (
+        <div className="flex items-center justify-end gap-1 mt-2 text-[10px] font-mono font-bold text-muted-foreground">
+          <span>LESS</span>
+          {[0, 1, 2, 3, 4].map((lvl) => (
             <div
-              key={i}
-              className="rounded-[2px]"
+              key={lvl}
               style={{
                 width: 10,
                 height: 10,
-                background: i === 0 ? (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)') : c,
+                background: lvl === 0 ? (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)') : accent,
+                opacity: lvl === 0 ? 1 : LEVEL_OPACITIES[lvl],
+                border: lvl > 0 ? '1px solid var(--border)' : 'none',
               }}
             />
           ))}
-          <span>More</span>
+          <span>MORE</span>
         </div>
       </div>
     </div>

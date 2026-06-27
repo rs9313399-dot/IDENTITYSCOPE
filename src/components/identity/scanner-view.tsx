@@ -85,26 +85,23 @@ export function ScannerView() {
 
   return (
     <div className="relative">
-      <div className="aurora opacity-60" />
       <div className="relative mx-auto max-w-5xl px-4 sm:px-6 py-12 sm:py-16">
         <Reveal>
-          <div className="text-center mb-10">
-            <Badge variant="secondary" className="mb-3 gap-1.5">
-              <ScanSearch className="h-3 w-3" /> Identity Scanner
-            </Badge>
-            <h1 className="text-3xl sm:text-5xl font-bold tracking-tight">
-              Scan a <span className="gradient-text">digital identity</span>
+          <div className="mb-10">
+            <span className="label-brutal">{"// "}Scanner</span>
+            <h1 className="text-4xl sm:text-6xl font-bold uppercase tracking-tight mt-2">
+              Scan a <span className="text-accent">digital identity</span>
             </h1>
-            <p className="text-muted-foreground mt-3 max-w-xl mx-auto text-sm sm:text-base">
+            <p className="text-muted-foreground mt-4 max-w-xl text-sm sm:text-base leading-relaxed">
               Enter a username, GitHub handle, website, or email. Add optional
               signals to enrich the report. All from public APIs.
             </p>
           </div>
         </Reveal>
 
-        {/* Mode tabs */}
+        {/* Mode tabs — brutalist, blocky */}
         <Reveal delay={0.1}>
-          <div className="flex flex-wrap justify-center gap-2 mb-6">
+          <div className="flex flex-wrap gap-0 mb-0 border-[3px] border-border border-b-0">
             {([
               { id: 'auto', label: 'Auto-detect', icon: Sparkles },
               { id: 'github', label: 'GitHub', icon: Github },
@@ -115,66 +112,66 @@ export function ScannerView() {
                 key={m.id}
                 onClick={() => setMode(m.id)}
                 className={cn(
-                  'inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium transition-all',
+                  'inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors border-r-[3px] border-border last:border-r-0',
                   mode === m.id
-                    ? 'bg-primary text-primary-foreground glow-primary'
-                    : 'glass text-muted-foreground hover:text-foreground'
+                    ? 'bg-foreground text-background'
+                    : 'bg-background text-foreground hover:bg-secondary'
                 )}
               >
-                <m.icon className="h-3.5 w-3.5" />
+                <m.icon className="h-3.5 w-3.5" strokeWidth={2} />
                 {m.label}
               </button>
             ))}
           </div>
         </Reveal>
 
-        {/* Form */}
+        {/* Form — brutalist, thick borders */}
         <Reveal delay={0.15}>
-          <form onSubmit={onSubmit} className="glass-strong rounded-3xl p-6 sm:p-8">
+          <form onSubmit={onSubmit} className="glass-strong p-6 sm:p-8">
             <div className="space-y-5">
               <div>
-                <Label htmlFor="query" className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+                <Label htmlFor="query" className="label-brutal mb-2 block">
                   Primary query
                 </Label>
                 <div className="relative">
                   <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground">
                     {detected === 'email' ? (
-                      <Mail className="h-4.5 w-4.5" />
+                      <Mail className="h-4.5 w-4.5" strokeWidth={2} />
                     ) : detected === 'website' ? (
-                      <Globe className="h-4.5 w-4.5" />
+                      <Globe className="h-4.5 w-4.5" strokeWidth={2} />
                     ) : detected === 'github' ? (
-                      <Github className="h-4.5 w-4.5" />
+                      <Github className="h-4.5 w-4.5" strokeWidth={2} />
                     ) : (
-                      <AtSign className="h-4.5 w-4.5" />
+                      <AtSign className="h-4.5 w-4.5" strokeWidth={2} />
                     )}
                   </div>
                   <Input
                     id="query"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder={placeholder}
+                    placeholder={placeholder.toUpperCase()}
                     autoComplete="off"
-                    className="h-14 pl-11 pr-32 text-base rounded-xl glass"
+                    className="h-14 pl-11 pr-32 text-base font-mono uppercase tracking-wide border-[3px] border-border focus:border-accent"
                   />
                   <div className="absolute right-2 top-1/2 -translate-y-1/2">
                     <Button
                       type="submit"
                       disabled={!query.trim() || scan.isPending}
-                      className="h-10 px-5"
+                      className="h-10 px-5 border-[3px] border-border bg-accent text-accent-foreground hover:bg-foreground hover:text-background font-bold uppercase tracking-wider"
                     >
                       {scan.isPending ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
                         <>
-                          <Zap className="h-4 w-4 mr-1.5" /> Scan
+                          <Zap className="h-4 w-4 mr-1.5" strokeWidth={2.5} /> Scan
                         </>
                       )}
                     </Button>
                   </div>
                 </div>
                 {query.trim() && (
-                  <p className="text-xs text-muted-foreground mt-2 ml-1">
-                    Detected: <span className="text-primary font-medium capitalize">{detected}</span>
+                  <p className="text-xs font-mono text-muted-foreground mt-2 ml-1 uppercase tracking-wider">
+                    Detected: <span className="text-accent font-bold">{detected}</span>
                   </p>
                 )}
               </div>
@@ -182,62 +179,62 @@ export function ScannerView() {
               {/* Optional enrichment */}
               <div className="grid sm:grid-cols-3 gap-3">
                 <div>
-                  <Label className="text-xs text-muted-foreground flex items-center gap-1.5 mb-1.5">
-                    <Github className="h-3 w-3" /> GitHub (optional)
+                  <Label className="label-brutal flex items-center gap-1.5 mb-1.5">
+                    <Github className="h-3 w-3" strokeWidth={2} /> GitHub (opt)
                   </Label>
                   <Input
                     value={github}
                     onChange={(e) => setGithub(e.target.value)}
-                    placeholder="@handle"
-                    className="h-11 glass"
+                    placeholder="@HANDLE"
+                    className="h-11 font-mono uppercase border-2 border-border"
                   />
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground flex items-center gap-1.5 mb-1.5">
-                    <Mail className="h-3 w-3" /> Email (optional)
+                  <Label className="label-brutal flex items-center gap-1.5 mb-1.5">
+                    <Mail className="h-3 w-3" strokeWidth={2} /> Email (opt)
                   </Label>
                   <Input
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@domain.com"
-                    className="h-11 glass"
+                    placeholder="YOU@DOMAIN.COM"
+                    className="h-11 font-mono uppercase border-2 border-border"
                   />
                 </div>
                 <div>
-                  <Label className="text-xs text-muted-foreground flex items-center gap-1.5 mb-1.5">
-                    <Globe className="h-3 w-3" /> Website (optional)
+                  <Label className="label-brutal flex items-center gap-1.5 mb-1.5">
+                    <Globe className="h-3 w-3" strokeWidth={2} /> Website (opt)
                   </Label>
                   <Input
                     value={website}
                     onChange={(e) => setWebsite(e.target.value)}
-                    placeholder="yoursite.com"
-                    className="h-11 glass"
+                    placeholder="YOURSITE.COM"
+                    className="h-11 font-mono uppercase border-2 border-border"
                   />
                 </div>
               </div>
             </div>
 
             {/* Examples */}
-            <div className="mt-6 pt-5 border-t border-border/40">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-xs text-muted-foreground mr-1">Try:</span>
+            <div className="mt-6 pt-5 border-t-[3px] border-border">
+              <div className="flex flex-wrap items-center gap-0">
+                <span className="label-brutal mr-3">Try:</span>
                 {EXAMPLES.map((ex) => (
                   <button
                     key={ex.label}
                     type="button"
                     onClick={() => loadExample(ex)}
-                    className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-md glass hover:bg-accent transition-colors"
+                    className="inline-flex items-center gap-1 text-xs font-mono font-bold uppercase px-2.5 py-1.5 border-2 border-border border-r-0 last:border-r hover:bg-foreground hover:text-background transition-colors"
                   >
-                    <span className="font-mono">{ex.label}</span>
-                    <span className="text-muted-foreground">· {ex.hint}</span>
+                    {ex.label}
+                    <span className="opacity-50">· {ex.hint}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-              <Shield className="h-3.5 w-3.5 text-emerald-500" />
-              Only public APIs are called. No accounts are accessed. Results cached locally.
+            <div className="mt-4 flex items-center gap-2 text-[10px] font-mono font-bold uppercase tracking-widest text-muted-foreground">
+              <Shield className="h-3.5 w-3.5" strokeWidth={2.5} />
+              Only public APIs · No accounts accessed · Results cached locally
             </div>
           </form>
         </Reveal>
@@ -249,29 +246,22 @@ export function ScannerView() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-background/85 backdrop-blur-md p-4"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 p-4"
             >
               <motion.div
-                initial={{ scale: 0.95, y: 10 }}
-                animate={{ scale: 1, y: 0 }}
-                className="glass-strong rounded-3xl p-6 max-w-md w-full"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="glass-strong p-6 max-w-md w-full"
               >
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-5">
-                  <div className="relative h-10 w-10 shrink-0">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                      className="absolute inset-0 rounded-full border-2 border-primary/20 border-t-primary"
-                    />
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <ScanSearch className="h-5 w-5 text-primary" />
-                    </div>
+                  <div className="h-10 w-10 shrink-0 border-[3px] border-border bg-accent flex items-center justify-center">
+                    <ScanSearch className="h-5 w-5 text-accent-foreground" strokeWidth={2.5} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-sm">Scanning digital identity…</h3>
-                    <p className="text-xs text-muted-foreground truncate">
-                      Querying public APIs for <span className="font-mono text-foreground">{query}</span>
+                    <h3 className="font-bold text-sm uppercase tracking-wide">Scanning…</h3>
+                    <p className="text-xs font-mono text-muted-foreground truncate">
+                      QUERY: <span className="text-foreground">{query}</span>
                     </p>
                   </div>
                 </div>
@@ -279,24 +269,24 @@ export function ScannerView() {
                 {/* Progress bar */}
                 {scan.activeConnectors.length > 0 && (
                   <div className="mb-4">
-                    <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1.5">
-                      <span>{scan.progress.length} / {scan.activeConnectors.length} connectors</span>
-                      <span className="tabular-nums">{Math.round((scan.progress.length / scan.activeConnectors.length) * 100)}%</span>
+                    <div className="flex items-center justify-between text-[10px] font-mono font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
+                      <span>{scan.progress.length} / {scan.activeConnectors.length} CONNECTORS</span>
+                      <span className="tabular-nums text-accent">{Math.round((scan.progress.length / scan.activeConnectors.length) * 100)}%</span>
                     </div>
-                    <div className="h-1 rounded-full bg-muted/40 overflow-hidden">
+                    <div className="h-2 border-2 border-border overflow-hidden">
                       <motion.div
                         animate={{
                           width: `${(scan.progress.length / scan.activeConnectors.length) * 100}%`,
                         }}
-                        transition={{ duration: 0.3 }}
-                        className="h-full rounded-full bg-gradient-to-r from-primary to-[oklch(0.7_0.25_305)]"
+                        transition={{ duration: 0.2 }}
+                        className="h-full bg-accent"
                       />
                     </div>
                   </div>
                 )}
 
                 {/* Connector list */}
-                <div className="space-y-1.5 max-h-64 overflow-y-auto scrollbar-thin">
+                <div className="space-y-0 max-h-64 overflow-y-auto scrollbar-thin border-2 border-border">
                   {scan.activeConnectors.map((name) => {
                     const evt = scan.progress.find((p) => p.name === name)
                     const isDone = !!evt
@@ -308,37 +298,35 @@ export function ScannerView() {
                         key={name}
                         initial={{ opacity: 0.4 }}
                         animate={{ opacity: isDone ? 1 : 0.4 }}
-                        transition={{ duration: 0.3 }}
-                        className="flex items-center gap-2.5 text-xs py-1.5 px-2 rounded-lg hover:bg-accent/30"
+                        transition={{ duration: 0.2 }}
+                        className="flex items-center gap-2.5 text-xs py-2 px-3 border-b-2 border-border last:border-b-0 hover:bg-secondary"
                       >
                         {isDone ? (
                           isFound ? (
-                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                            <CheckCircle2 className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} />
                           ) : isError ? (
-                            <XCircle className="h-3.5 w-3.5 text-red-500 shrink-0" />
+                            <XCircle className="h-3.5 w-3.5 text-accent shrink-0" strokeWidth={2.5} />
                           ) : isNotFound ? (
-                            <MinusCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                            <MinusCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0" strokeWidth={2.5} />
                           ) : (
-                            <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                            <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" strokeWidth={2.5} />
                           )
                         ) : (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin text-primary shrink-0" />
+                          <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" strokeWidth={2.5} />
                         )}
-                        <span className={isDone ? 'text-foreground font-medium' : 'text-muted-foreground'}>
+                        <span className={isDone ? 'font-bold uppercase tracking-wide' : 'text-muted-foreground uppercase tracking-wide'}>
                           {name}
                         </span>
                         {isFound && (
-                          <Badge variant="secondary" className="text-[9px] ml-auto text-emerald-500 py-0">
-                            found
-                          </Badge>
+                          <span className="text-[9px] font-mono font-bold uppercase ml-auto border-2 border-border px-1.5 py-0">
+                            FOUND
+                          </span>
                         )}
                         {isNotFound && (
-                          <span className="text-[10px] text-muted-foreground ml-auto">not found</span>
+                          <span className="text-[9px] font-mono font-bold uppercase ml-auto text-muted-foreground">NOT FOUND</span>
                         )}
                         {isError && evt?.error && (
-                          <span className="text-[10px] text-red-500 ml-auto truncate max-w-[100px]" title={evt.error}>
-                            error
-                          </span>
+                          <span className="text-[9px] font-mono font-bold uppercase ml-auto text-accent">ERROR</span>
                         )}
                       </motion.div>
                     )
@@ -346,8 +334,8 @@ export function ScannerView() {
                 </div>
 
                 {/* Footer */}
-                <div className="mt-4 pt-3 border-t border-border/40 flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground">
-                  <Shield className="h-3 w-3 text-emerald-500" />
+                <div className="mt-4 pt-3 border-t-[3px] border-border flex items-center justify-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-muted-foreground">
+                  <Shield className="h-3 w-3" strokeWidth={2.5} />
                   Only public APIs · No private data accessed
                 </div>
               </motion.div>

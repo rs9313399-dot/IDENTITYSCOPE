@@ -15,14 +15,12 @@ export type View =
   | 'settings'
   | 'about'
 
-export type AccentColor = 'violet' | 'emerald' | 'rose' | 'amber' | 'cyan'
+export type AccentColor = 'red' | 'yellow' | 'green'
 
 export const ACCENT_COLORS: { id: AccentColor; label: string; primary: string; preview: string }[] = [
-  { id: 'violet', label: 'Violet', primary: 'oklch(0.72 0.19 265)', preview: 'oklch(0.72 0.19 265)' },
-  { id: 'emerald', label: 'Emerald', primary: 'oklch(0.72 0.19 165)', preview: 'oklch(0.72 0.19 165)' },
-  { id: 'rose', label: 'Rose', primary: 'oklch(0.7 0.2 15)', preview: 'oklch(0.7 0.2 15)' },
-  { id: 'amber', label: 'Amber', primary: 'oklch(0.78 0.16 75)', preview: 'oklch(0.78 0.16 75)' },
-  { id: 'cyan', label: 'Cyan', primary: 'oklch(0.72 0.14 200)', preview: 'oklch(0.72 0.14 200)' },
+  { id: 'red', label: 'Red', primary: '#FF3B30', preview: '#FF3B30' },
+  { id: 'yellow', label: 'Yellow', primary: '#FFD60A', preview: '#FFD60A' },
+  { id: 'green', label: 'Green', primary: '#00FF66', preview: '#00FF66' },
 ]
 
 interface AppState {
@@ -71,7 +69,7 @@ export const useAppStore = create<AppState>()(
         showPrivateSignals: false,
         defaultView: 'scanner',
         cacheTtlMinutes: 10,
-        accentColor: 'violet',
+        accentColor: 'red',
       },
       updateSettings: (s) => set((state) => ({ settings: { ...state.settings, ...s } })),
       setAccentColor: (c) =>

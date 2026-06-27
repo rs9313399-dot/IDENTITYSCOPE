@@ -94,7 +94,7 @@ export function ProgressRing({
           fill="none"
           stroke="currentColor"
           strokeWidth={stroke}
-          className="text-muted/30"
+          className="text-muted/40"
         />
         <motion.circle
           cx={size / 2}
@@ -103,38 +103,46 @@ export function ProgressRing({
           fill="none"
           stroke={ringColor}
           strokeWidth={stroke}
-          strokeLinecap="round"
+          strokeLinecap="butt"
           strokeDasharray={circ}
           animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1.2, ease: 'easeOut' }}
-          style={{ filter: `drop-shadow(0 0 6px ${ringColor}66)` }}
+          transition={{ duration: 1, ease: 'easeOut' }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-bold tabular-nums" style={{ color: ringColor }}>
+        <span className="text-3xl font-bold tabular-nums" style={{ color: ringColor }}>
           {Math.round(value)}
         </span>
-        {label && <span className="text-[10px] uppercase tracking-wider text-muted-foreground mt-0.5">{label}</span>}
-        {sublabel && <span className="text-[9px] text-muted-foreground/70">{sublabel}</span>}
+        {label && <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-muted-foreground mt-0.5">{label}</span>}
+        {sublabel && <span className="text-[9px] font-mono text-muted-foreground/70">{sublabel}</span>}
       </div>
     </div>
   )
 }
 
+/** Brutalist score color — uses the accent for high scores, foreground for mid, muted for low. */
 export function scoreColor(score: number) {
-  if (score >= 75) return 'oklch(0.72 0.19 165)' // green
-  if (score >= 55) return 'oklch(0.78 0.16 85)' // yellow-green
-  if (score >= 35) return 'oklch(0.78 0.17 70)' // amber
-  return 'oklch(0.68 0.22 25)' // red
+  if (typeof window !== 'undefined') {
+    const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()
+    const fg = getComputedStyle(document.documentElement).getPropertyValue('--foreground').trim()
+    const muted = getComputedStyle(document.documentElement).getPropertyValue('--muted-foreground').trim()
+    if (score >= 75) return accent || '#FF3B30'
+    if (score >= 40) return fg || '#000000'
+    return muted || '#888888'
+  }
+  // SSR fallback
+  if (score >= 75) return '#FF3B30'
+  if (score >= 40) return '#000000'
+  return '#888888'
 }
 
 export function scoreLabel(score: number) {
-  if (score >= 85) return 'Excellent'
-  if (score >= 70) return 'Strong'
-  if (score >= 55) return 'Good'
-  if (score >= 40) return 'Fair'
-  if (score >= 25) return 'Weak'
-  return 'Critical'
+  if (score >= 85) return 'EXCELLENT'
+  if (score >= 70) return 'STRONG'
+  if (score >= 55) return 'GOOD'
+  if (score >= 40) return 'FAIR'
+  if (score >= 25) return 'WEAK'
+  return 'CRITICAL'
 }
 
 /** Fade + slide in wrapper. */
