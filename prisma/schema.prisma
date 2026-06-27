@@ -1,0 +1,38 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// A single scan / digital identity report
+model Scan {
+  id        String   @id @default(cuid())
+  query     String   // the primary input (username / github handle / website / email)
+  queryType String   // 'username' | 'github' | 'website' | 'email'
+  email     String?
+  website   String?
+  github    String?
+
+  // overall score snapshot for quick display in history
+  overallScore Int?
+  developerScore Int?
+  portfolioScore Int?
+
+  // full report JSON blob (aggregated connector results + ai report)
+  reportJson String
+
+  bookmarked Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([query])
+  @@index([createdAt])
+  @@index([bookmarked])
+}
