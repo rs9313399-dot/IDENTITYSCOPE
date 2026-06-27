@@ -239,7 +239,7 @@ export function ScannerView() {
           </form>
         </Reveal>
 
-        {/* Scanning overlay with real-time connector progress */}
+        {/* Scanning overlay — terminal scan log */}
         <AnimatePresence>
           {scan.isPending && (
             <motion.div
@@ -251,92 +251,87 @@ export function ScannerView() {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="glass-strong p-6 max-w-md w-full"
+                className="terminal-panel max-w-lg w-full"
               >
-                {/* Header */}
-                <div className="flex items-center gap-3 mb-5">
-                  <div className="h-10 w-10 shrink-0 border-[3px] border-border bg-accent flex items-center justify-center">
-                    <ScanSearch className="h-5 w-5 text-accent-foreground" strokeWidth={2.5} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-sm uppercase tracking-wide">Scanning…</h3>
-                    <p className="text-xs font-mono text-muted-foreground truncate">
-                      QUERY: <span className="text-foreground">{query}</span>
-                    </p>
-                  </div>
+                <div className="dossier-header">
+                  <span className="flex items-center gap-2">
+                    <span className="inline-block h-1.5 w-1.5 bg-accent animate-pulse" />
+                    SCAN_IN_PROGRESS
+                  </span>
+                  <span className="font-mono text-[10px]">TARGET: {query.toUpperCase()}</span>
                 </div>
-
-                {/* Progress bar */}
-                {scan.activeConnectors.length > 0 && (
-                  <div className="mb-4">
-                    <div className="flex items-center justify-between text-[10px] font-mono font-bold uppercase tracking-widest text-muted-foreground mb-1.5">
-                      <span>{scan.progress.length} / {scan.activeConnectors.length} CONNECTORS</span>
-                      <span className="tabular-nums text-accent">{Math.round((scan.progress.length / scan.activeConnectors.length) * 100)}%</span>
-                    </div>
-                    <div className="h-2 border-2 border-border overflow-hidden">
-                      <motion.div
-                        animate={{
-                          width: `${(scan.progress.length / scan.activeConnectors.length) * 100}%`,
-                        }}
-                        transition={{ duration: 0.2 }}
-                        className="h-full bg-accent"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Connector list */}
-                <div className="space-y-0 max-h-64 overflow-y-auto scrollbar-thin border-2 border-border">
-                  {scan.activeConnectors.map((name) => {
-                    const evt = scan.progress.find((p) => p.name === name)
-                    const isDone = !!evt
-                    const isError = evt?.status === 'error'
-                    const isFound = evt?.status === 'found'
-                    const isNotFound = evt?.status === 'not_found'
-                    return (
-                      <motion.div
-                        key={name}
-                        initial={{ opacity: 0.4 }}
-                        animate={{ opacity: isDone ? 1 : 0.4 }}
-                        transition={{ duration: 0.2 }}
-                        className="flex items-center gap-2.5 text-xs py-2 px-3 border-b-2 border-border last:border-b-0 hover:bg-secondary"
-                      >
-                        {isDone ? (
-                          isFound ? (
-                            <CheckCircle2 className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} />
-                          ) : isError ? (
-                            <XCircle className="h-3.5 w-3.5 text-accent shrink-0" strokeWidth={2.5} />
-                          ) : isNotFound ? (
-                            <MinusCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0" strokeWidth={2.5} />
-                          ) : (
-                            <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground shrink-0" strokeWidth={2.5} />
-                          )
-                        ) : (
-                          <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" strokeWidth={2.5} />
-                        )}
-                        <span className={isDone ? 'font-bold uppercase tracking-wide' : 'text-muted-foreground uppercase tracking-wide'}>
-                          {name}
+                <div className="p-5 font-mono text-xs">
+                  {/* ASCII block progress */}
+                  {scan.activeConnectors.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex items-center justify-between text-[10px] uppercase tracking-widest text-muted-foreground mb-1.5">
+                        <span>SCANNING</span>
+                        <span className="text-accent tabular-nums">
+                          {Math.round((scan.progress.length / scan.activeConnectors.length) * 100)}%
                         </span>
-                        {isFound && (
-                          <span className="text-[9px] font-mono font-bold uppercase ml-auto border-2 border-border px-1.5 py-0">
-                            FOUND
-                          </span>
-                        )}
-                        {isNotFound && (
-                          <span className="text-[9px] font-mono font-bold uppercase ml-auto text-muted-foreground">NOT FOUND</span>
-                        )}
-                        {isError && evt?.error && (
-                          <span className="text-[9px] font-mono font-bold uppercase ml-auto text-accent">ERROR</span>
-                        )}
-                      </motion.div>
-                    )
-                  })}
-                </div>
+                      </div>
+                      <div className="text-accent text-[11px] tracking-tight overflow-hidden">
+                        {'SCANNING '}
+                        {Array.from({ length: 20 }).map((_, i) => {
+                          const filled = (scan.progress.length / scan.activeConnectors.length) * 20
+                          return i < filled ? '█' : '░'
+                        })}
+                        {' '}
+                        {Math.round((scan.progress.length / scan.activeConnectors.length) * 100)}%
+                      </div>
+                    </div>
+                  )}
 
-                {/* Footer */}
-                <div className="mt-4 pt-3 border-t-[3px] border-border flex items-center justify-center gap-1.5 text-[10px] font-mono font-bold uppercase tracking-widest text-muted-foreground">
-                  <Shield className="h-3 w-3" strokeWidth={2.5} />
-                  Only public APIs · No private data accessed
+                  {/* Scan log — terminal output */}
+                  <div className="border-2 border-border bg-background/50 p-3 max-h-64 overflow-y-auto scrollbar-thin space-y-0.5">
+                    <div className="scan-log">
+                      <span className="ts">[00:00]</span>
+                      <span>{'> initiating_scan_protocol_'}</span>
+                    </div>
+                    {scan.progress.map((evt, i) => {
+                      const ts = `[00:${String(i + 1).padStart(2, '0')}]`
+                      const statusText =
+                        evt.status === 'found' ? 'FOUND'
+                        : evt.status === 'not_found' ? 'NOT_FOUND'
+                        : evt.status === 'error' ? 'ERROR'
+                        : 'SKIPPED'
+                      const variant =
+                        evt.status === 'found' ? 'ok'
+                        : evt.status === 'error' ? 'err'
+                        : evt.status === 'not_found' ? 'warn'
+                        : 'default'
+                      return (
+                        <div key={i} className="scan-log">
+                          <span className="ts">{ts}</span>
+                          <span>
+                            {'> checking_' + evt.name.toLowerCase().replace(/\s+/g, '_') + '... '}
+                          </span>
+                          <span className={variant === 'ok' ? 'ok' : variant === 'err' ? 'err' : variant === 'warn' ? 'warn' : ''}>
+                            {statusText}
+                          </span>
+                        </div>
+                      )
+                    })}
+                    {scan.progress.length < scan.activeConnectors.length && (
+                      <div className="scan-log">
+                        <span className="ts">[...]</span>
+                        <span className="flex items-center gap-1">
+                          {'> '}
+                          <span className="cursor-blink" />
+                          <span className="text-muted-foreground">scanning_remaining_connectors_</span>
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Footer */}
+                  <div className="mt-3 flex items-center justify-between text-[10px] uppercase tracking-widest text-muted-foreground">
+                    <span>{scan.progress.length}/{scan.activeConnectors.length} CONNECTORS</span>
+                    <span className="flex items-center gap-1.5">
+                      <Shield className="h-3 w-3 text-accent" strokeWidth={2.5} />
+                      PUBLIC_DATA_ONLY
+                    </span>
+                  </div>
                 </div>
               </motion.div>
             </motion.div>

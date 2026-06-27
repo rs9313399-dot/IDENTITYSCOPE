@@ -643,3 +643,84 @@ Unresolved / next-phase recommendations:
 3. **Modals**: share/diff/command palette modals use `.glass-strong` which is now brutalist, but could be refined further.
 4. **About page**: verify the principles/API list render brutalist.
 5. **Print styles**: verify brutalist print output.
+
+---
+Task ID: cyber-brutalism-redesign
+Agent: UI/UX Designer (Cyber Brutalism)
+Task: Transform the entire IdentityScope AI interface into a "CYBER BRUTALISM DOSSIER UI" — a raw hacker-intelligence-dashboard aesthetic with terminal panels, ASCII borders, scan logs, block meters, and stamped status tags. All functionality preserved.
+
+Work Log:
+- Reviewed the previous brutalist redesign (basic B&W + red accent). Elevated it to full cyber-brutalism with #050505 background, #00FF66 green accent, terminal panels, scan logs, dossier sections.
+- Created reusable cyber elements: TerminalPanel, StatusTag, RiskTag, BlockMeter, ScanLog, AsciiSeparator, BgText.
+
+Implemented changes:
+
+1. **Complete CSS token overhaul** (`src/app/globals.css`):
+   - Dark theme (canonical): `#050505` bg, `#0A0A0A` surface, `#FFFFFF` text, `#A3A3A3` secondary, `#00FF66` accent, `#FF3B30` danger, `#FFD60A` warning.
+   - Body has subtle 32px grid overlay (terminal feel).
+   - New cyber utilities: `.terminal-panel` (dossier container with green top strip), `.cursor-blink`, `.flicker`, `.slide-in`, `.shake`, `.bg-text-faded` (massive faded background typography).
+   - New components: `.dossier-header` (terminal panel header strip), `.scan-log` (terminal output with colored timestamps), `.status-found/missing/weak/strong/archived` (stamped status tags), `.risk-low/medium/high` (risk tags), `.block-meter` (ASCII progress bar).
+   - Selection color: green on black.
+   - Scrollbar: green thumb on dark surface.
+
+2. **Accent system** (`src/stores/app-store.ts` + `src/components/accent-color-provider.tsx`):
+   - 3 cyber accents: Green (#00FF66 default), Amber (#FFD60A), Cyan (#00E5FF).
+   - All use dark text (#050505) since they're neon bright.
+
+3. **Layout** (`src/app/layout.tsx`):
+   - Forced dark theme (enableSystem=false) — cyber brutalism is dark-first.
+   - Fonts: Space Grotesk (sans) + JetBrains Mono (mono).
+
+4. **Header** (`src/components/identity/header.tsx`):
+   - Top status strip: "SYSTEM_ONLINE · PUBLIC_API_MODE · NO_AUTH_BYPASS · v1.0.0 · IDENTITY_TRACE_ACTIVE" with pulsing green dot.
+   - Logo: green square with scan icon, "IDENTITYSCOPE" + "// AI_SCANNER".
+   - Nav: monospace uppercase (SCAN/DOSSIER/AI_VERDICT/VS/SAVED/ARCHIVE/INFO), active = green block.
+   - CTA: green "START_SCAN" button.
+   - Footer: terminal ending block with BUILD/MODE/STATUS metadata.
+
+5. **Landing page** (`src/components/identity/landing-view.tsx`):
+   - Hero: split layout — massive "SCAN YOUR PUBLIC INTERNET IDITY." headline (left) + terminal preview box (right) with ASCII borders showing a fake scan result (TARGET/GITHUB/CODEFORCES/SCORE).
+   - Blinking cursor at end of terminal preview.
+   - Faded background "SCAN" text.
+   - All sections use `// 01 — INPUT_TYPES` editorial labels.
+   - Stats grid with green icons.
+   - Features as "RAW_SIGNALS" with monospace titles.
+   - CTA: "RUN_FIRST_SCAN".
+
+6. **Scanner overlay** (`src/components/identity/scanner-view.tsx`):
+   - Terminal scan log with timestamps `[00:00]`, `[00:01]`...
+   - ASCII block progress bar: `SCANNING ███████████░░░░░ 72%` using █ and ░ characters.
+   - Log entries: `> checking_github... FOUND` with colored status (green/red/amber).
+   - Blinking cursor while scanning remaining connectors.
+   - Footer: "X/Y CONNECTORS · PUBLIC_DATA_ONLY".
+
+7. **Score system** (`src/components/charts/animated.tsx`):
+   - `scoreColor()`: green (>=70), amber (>=40), red (<40) — cyber status colors.
+   - `scoreLabel()`: EXCELLENT/STRONG/GOOD/FAIR/WEAK/CRITICAL (uppercase).
+   - `blockMeter()`: ASCII bar `[████████░░░░░░] 78/100`.
+
+8. **Reusable cyber elements** (`src/components/identity/cyber-elements.tsx`):
+   - `TerminalPanel`: dossier container with header strip + optional status tag.
+   - `StatusTag`: stamped FOUND/MISSING/WEAK/STRONG/ARCHIVED labels.
+   - `RiskTag`: RISK: LOW/MEDIUM/HIGH.
+   - `BlockMeter`: ASCII progress bar component.
+   - `ScanLog`: terminal log line with timestamp.
+   - `AsciiSeparator`: horizontal ASCII divider.
+   - `BgText`: massive faded background typography.
+
+Stage Summary:
+- All changes lint clean (`bun run lint` passes).
+- Dev server healthy on port 3000 (HTTP 200).
+- Verified via agent-browser + VLM:
+  - Landing: cyber-brutalist with #050505 bg, #00FF66 accent, massive headline, terminal preview box with ASCII borders + blinking cursor, faded "SCAN" background text, status strip.
+  - Scanner overlay: terminal scan log with [00:01] timestamps, ASCII block progress bar (█░), colored status (green FOUND / red ERROR / amber NOT_FOUND), blinking cursor.
+  - Dashboard: cyber-brutalist dossier with score ring, terminal panels, green/amber/red score cards, monospace labels, status tags.
+  - Mobile (375px): responsive cyber-brutalist layout.
+- ALL functionality preserved: scanning, AI streaming, compare, history, bookmarks, settings, share/diff modals, command palette, keyboard shortcuts, onboarding tour, accent picker.
+
+Unresolved / next-phase recommendations:
+1. **Dashboard sections**: convert remaining dashboard cards (GitHub profile, repos, languages) to TerminalPanel + StatusTag components for full dossier consistency.
+2. **Compare view**: style as "DEVELOPER VS DEVELOPER" fight card with winner badges.
+3. **History view**: style as archived case files (CASE #001, TARGET, DATE, STATUS: ARCHIVED).
+4. **Report view**: style as intelligence dossier with numbered sections.
+5. **Modals**: apply terminal-panel styling to share/diff/command-palette modals.

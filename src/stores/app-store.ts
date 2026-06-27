@@ -15,12 +15,12 @@ export type View =
   | 'settings'
   | 'about'
 
-export type AccentColor = 'red' | 'yellow' | 'green'
+export type AccentColor = 'green' | 'amber' | 'cyan'
 
 export const ACCENT_COLORS: { id: AccentColor; label: string; primary: string; preview: string }[] = [
-  { id: 'red', label: 'Red', primary: '#FF3B30', preview: '#FF3B30' },
-  { id: 'yellow', label: 'Yellow', primary: '#FFD60A', preview: '#FFD60A' },
   { id: 'green', label: 'Green', primary: '#00FF66', preview: '#00FF66' },
+  { id: 'amber', label: 'Amber', primary: '#FFD60A', preview: '#FFD60A' },
+  { id: 'cyan', label: 'Cyan', primary: '#00E5FF', preview: '#00E5FF' },
 ]
 
 interface AppState {
@@ -69,7 +69,7 @@ export const useAppStore = create<AppState>()(
         showPrivateSignals: false,
         defaultView: 'scanner',
         cacheTtlMinutes: 10,
-        accentColor: 'red',
+        accentColor: 'green',
       },
       updateSettings: (s) => set((state) => ({ settings: { ...state.settings, ...s } })),
       setAccentColor: (c) =>

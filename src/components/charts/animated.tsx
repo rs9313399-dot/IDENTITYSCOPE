@@ -120,20 +120,11 @@ export function ProgressRing({
   )
 }
 
-/** Brutalist score color — uses the accent for high scores, foreground for mid, muted for low. */
+/** Cyber brutalist score color — green (strong), amber (medium), red (weak). */
 export function scoreColor(score: number) {
-  if (typeof window !== 'undefined') {
-    const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim()
-    const fg = getComputedStyle(document.documentElement).getPropertyValue('--foreground').trim()
-    const muted = getComputedStyle(document.documentElement).getPropertyValue('--muted-foreground').trim()
-    if (score >= 75) return accent || '#FF3B30'
-    if (score >= 40) return fg || '#000000'
-    return muted || '#888888'
-  }
-  // SSR fallback
-  if (score >= 75) return '#FF3B30'
-  if (score >= 40) return '#000000'
-  return '#888888'
+  if (score >= 70) return '#00FF66' // green — strong
+  if (score >= 40) return '#FFD60A' // amber — medium
+  return '#FF3B30' // red — weak
 }
 
 export function scoreLabel(score: number) {
@@ -143,6 +134,12 @@ export function scoreLabel(score: number) {
   if (score >= 40) return 'FAIR'
   if (score >= 25) return 'WEAK'
   return 'CRITICAL'
+}
+
+/** Block meter — ASCII-style progress bar using block characters. */
+export function blockMeter(value: number, max = 100, width = 16): string {
+  const filled = Math.round((value / max) * width)
+  return '[' + '█'.repeat(filled) + '░'.repeat(width - filled) + ']'
 }
 
 /** Fade + slide in wrapper. */

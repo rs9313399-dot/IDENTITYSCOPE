@@ -44,83 +44,93 @@
 }
 
 /* ============================================================
-   BRUTALISM DESIGN TOKENS
-   Black & White base · ONE accent · Sharp corners · Thick borders
+   CYBER BRUTALISM DOSSIER UI — DESIGN TOKENS
+   #050505 bg · #00FF66 accent · terminal · dossier · raw
    ============================================================ */
 
 :root {
   --radius: 0px;
-  /* Light theme — pure black on white */
+  /* Light theme — kept for accessibility toggle, but the app is dark-first */
   --background: #FFFFFF;
-  --foreground: #000000;
+  --foreground: #050505;
   --card: #FFFFFF;
-  --card-foreground: #000000;
+  --card-foreground: #050505;
   --popover: #FFFFFF;
-  --popover-foreground: #000000;
-  --primary: #000000;
+  --popover-foreground: #050505;
+  --primary: #050505;
   --primary-foreground: #FFFFFF;
   --secondary: #E5E5E5;
-  --secondary-foreground: #000000;
+  --secondary-foreground: #050505;
   --muted: #E5E5E5;
   --muted-foreground: #555555;
-  --accent: #FF3B30;
-  --accent-foreground: #FFFFFF;
+  --accent: #00FF66;
+  --accent-foreground: #050505;
   --destructive: #FF3B30;
-  --border: #000000;
-  --input: #000000;
-  --ring: #000000;
-  --chart-1: #000000;
-  --chart-2: #FF3B30;
-  --chart-3: #555555;
-  --chart-4: #999999;
-  --chart-5: #E5E5E5;
+  --border: #050505;
+  --input: #050505;
+  --ring: #00FF66;
+  --chart-1: #050505;
+  --chart-2: #00FF66;
+  --chart-3: #FFD60A;
+  --chart-4: #FF3B30;
+  --chart-5: #A3A3A3;
   --sidebar: #FFFFFF;
-  --sidebar-foreground: #000000;
-  --sidebar-primary: #000000;
+  --sidebar-foreground: #050505;
+  --sidebar-primary: #050505;
   --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent: #E5E5E5;
-  --sidebar-accent-foreground: #000000;
-  --sidebar-border: #000000;
-  --sidebar-ring: #000000;
+  --sidebar-accent-foreground: #050505;
+  --sidebar-border: #050505;
+  --sidebar-ring: #00FF66;
+  /* Cyber-specific tokens */
+  --cyber-bg: #FFFFFF;
+  --cyber-surface: #F5F5F5;
+  --cyber-grid: rgba(5, 5, 5, 0.06);
+  --cyber-dim: #A3A3A3;
 }
 
 .dark {
-  /* Dark theme — pure white on black */
-  --background: #000000;
+  /* Dark theme — the canonical Cyber Brutalism palette */
+  --background: #050505;
   --foreground: #FFFFFF;
-  --card: #000000;
+  --card: #0A0A0A;
   --card-foreground: #FFFFFF;
-  --popover: #000000;
+  --popover: #0A0A0A;
   --popover-foreground: #FFFFFF;
   --primary: #FFFFFF;
-  --primary-foreground: #000000;
-  --secondary: #1A1A1A;
+  --primary-foreground: #050505;
+  --secondary: #141414;
   --secondary-foreground: #FFFFFF;
-  --muted: #1A1A1A;
-  --muted-foreground: #888888;
-  --accent: #FF3B30;
-  --accent-foreground: #FFFFFF;
+  --muted: #141414;
+  --muted-foreground: #A3A3A3;
+  --accent: #00FF66;
+  --accent-foreground: #050505;
   --destructive: #FF3B30;
   --border: #FFFFFF;
   --input: #FFFFFF;
-  --ring: #FFFFFF;
+  --ring: #00FF66;
   --chart-1: #FFFFFF;
-  --chart-2: #FF3B30;
-  --chart-3: #888888;
-  --chart-4: #555555;
-  --chart-5: #1A1A1A;
-  --sidebar: #000000;
+  --chart-2: #00FF66;
+  --chart-3: #FFD60A;
+  --chart-4: #FF3B30;
+  --chart-5: #A3A3A3;
+  --sidebar: #050505;
   --sidebar-foreground: #FFFFFF;
   --sidebar-primary: #FFFFFF;
-  --sidebar-primary-foreground: #000000;
-  --sidebar-accent: #1A1A1A;
+  --sidebar-primary-foreground: #050505;
+  --sidebar-accent: #141414;
   --sidebar-accent-foreground: #FFFFFF;
   --sidebar-border: #FFFFFF;
-  --sidebar-ring: #FFFFFF;
+  --sidebar-ring: #00FF66;
+  /* Cyber-specific tokens */
+  --cyber-bg: #050505;
+  --cyber-surface: #0A0A0A;
+  --cyber-grid: rgba(255, 255, 255, 0.04);
+  --cyber-dim: #A3A3A3;
 }
 
 @layer base {
-  /* NUCLEAR: no rounded corners anywhere. Brutalism = sharp edges only. */
+  /* NUCLEAR: no rounded corners anywhere. Cyber brutalism = sharp edges only. */
   *,
   *::before,
   *::after {
@@ -138,49 +148,59 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-sans), system-ui, sans-serif;
+    font-family: var(--font-mono), var(--font-sans), monospace;
     font-feature-settings: "ss01", "cv11";
     letter-spacing: -0.01em;
+    /* Subtle grid overlay on the whole body */
+    background-image:
+      linear-gradient(to right, var(--cyber-grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--cyber-grid) 1px, transparent 1px);
+    background-size: 32px 32px;
   }
 
   /* Visible focus states for accessibility */
   *:focus-visible {
-    outline: 3px solid var(--accent);
-    outline-offset: 2px;
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
   }
 
   /* Headings: massive, bold, uppercase, compressed */
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-sans), system-ui, sans-serif;
-    font-weight: 700;
+    font-weight: 900;
     letter-spacing: -0.04em;
-    line-height: 0.95;
+    line-height: 0.92;
     text-transform: uppercase;
+  }
+
+  /* Selection — green on black */
+  ::selection {
+    background: var(--accent);
+    color: var(--background);
   }
 }
 
 /* ============================================================
-   BRUTALIST UTILITY CLASSES
-   Override previously-decorative classes to be brutalist.
+   CYBER BRUTALIST UTILITY CLASSES
    ============================================================ */
 
 @layer utilities {
-  /* Glass → solid box with thick black border. No blur, no transparency. */
+  /* Glass → solid dossier panel with thick border + header strip capability */
   .glass {
-    background: var(--card);
+    background: var(--cyber-surface);
     border: 2px solid var(--border);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
 
   .glass-strong {
-    background: var(--card);
+    background: var(--cyber-surface);
     border: 3px solid var(--border);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
 
-  /* Gradient text → solid. Brutalism has no gradients. */
+  /* Gradient text → solid accent (terminal green) */
   .gradient-text {
     background: none;
     -webkit-text-fill-color: initial;
@@ -195,13 +215,13 @@
     display: none;
   }
 
-  /* Glow → removed. No soft shadows in brutalism. */
+  /* Glow → removed. No soft shadows in cyber brutalism. */
   .glow,
   .glow-primary {
     box-shadow: none;
   }
 
-  /* Aurora → removed. No decorative blurs. */
+  /* Aurora → removed. */
   .aurora {
     display: none;
   }
@@ -210,48 +230,48 @@
     display: none;
   }
 
-  /* Grid background → hard visible grid (brutalist) */
+  /* Grid background — hard visible grid (terminal feel) */
   .bg-grid {
     background-image:
-      linear-gradient(to right, var(--border) 1px, transparent 1px),
-      linear-gradient(to bottom, var(--border) 1px, transparent 1px);
-    background-size: 48px 48px;
-    opacity: 0.06;
+      linear-gradient(to right, var(--cyber-grid) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--cyber-grid) 1px, transparent 1px);
+    background-size: 32px 32px;
+    opacity: 1;
   }
 
   /* Dots → minimal */
   .bg-dots {
-    background-image: radial-gradient(var(--border) 1px, transparent 1px);
-    background-size: 24px 24px;
-    opacity: 0.08;
+    background-image: radial-gradient(var(--cyber-grid) 1px, transparent 1px);
+    background-size: 16px 16px;
+    opacity: 1;
   }
 
   .text-balance {
     text-wrap: balance;
   }
 
-  /* Scrollbar — minimal, blocky */
+  /* Scrollbar — blocky, terminal-style */
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
+    scrollbar-color: var(--accent) var(--cyber-surface);
   }
   .scrollbar-thin::-webkit-scrollbar {
     width: 8px;
     height: 8px;
   }
   .scrollbar-thin::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--cyber-surface);
     border-left: 1px solid var(--border);
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: var(--border);
+    background-color: var(--accent);
     border-radius: 0;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-    background-color: var(--accent);
+    background-color: var(--foreground);
   }
 
-  /* Brutalist shadow — hard offset, no blur */
+  /* Brutalist hard shadow — offset, no blur */
   .shadow-brutal {
     box-shadow: 4px 4px 0 0 var(--border);
   }
@@ -261,38 +281,133 @@
   .shadow-brutal-accent {
     box-shadow: 4px 4px 0 0 var(--accent);
   }
+
+  /* ===== CYBER-SPECIFIC UTILITIES ===== */
+
+  /* Terminal panel — the dossier container */
+  .terminal-panel {
+    background: var(--cyber-surface);
+    border: 2px solid var(--border);
+    position: relative;
+  }
+  .terminal-panel::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  /* Blinking cursor */
+  .cursor-blink {
+    display: inline-block;
+    width: 0.6em;
+    height: 1em;
+    background: var(--accent);
+    vertical-align: text-bottom;
+    animation: blink 1s steps(2) infinite;
+  }
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  /* Text flicker on scan */
+  .flicker {
+    animation: flicker 0.15s steps(2) 2;
+  }
+  @keyframes flicker {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
+  }
+
+  /* Hard slide-in */
+  .slide-in {
+    animation: slide-in 0.2s ease-out;
+  }
+  @keyframes slide-in {
+    from { transform: translateX(-8px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  /* Shake on error */
+  .shake {
+    animation: shake 0.3s ease-in-out;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+  }
+
+  /* Large faded background typography */
+  .bg-text-faded {
+    position: absolute;
+    font-family: var(--font-sans);
+    font-weight: 900;
+    font-size: clamp(8rem, 20vw, 16rem);
+    color: var(--border);
+    opacity: 0.03;
+    pointer-events: none;
+    user-select: none;
+    text-transform: uppercase;
+    letter-spacing: -0.05em;
+    line-height: 0.8;
+    white-space: nowrap;
+    z-index: 0;
+  }
 }
 
 /* ============================================================
-   SHADCN COMPONENT OVERRIDES — BRUTALIST
+   CYBER BRUTALIST COMPONENTS
    ============================================================ */
 
 @layer components {
-  /* Buttons: rectangular, thick border, hover INVERT */
+  /* Buttons: black bg, white border, hover INVERT to green */
   .btn-brutal {
     border: 2px solid var(--border);
     background: var(--background);
     color: var(--foreground);
+    font-family: var(--font-mono), monospace;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.02em;
-    transition: transform 0.08s ease, background 0.08s ease, color 0.08s ease;
+    letter-spacing: 0.04em;
+    transition: background 0.08s ease, color 0.08s ease, transform 0.08s ease;
   }
   .btn-brutal:hover {
-    background: var(--foreground);
+    background: var(--accent);
     color: var(--background);
+    border-color: var(--accent);
     transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0 0 var(--accent);
   }
   .btn-brutal:active {
     transform: translate(0, 0);
-    box-shadow: none;
   }
 
-  /* Inputs: square, thick border, large padding */
+  /* Accent button — green by default, inverts to black on hover */
+  .btn-brutal-accent {
+    border: 2px solid var(--accent);
+    background: var(--accent);
+    color: var(--background);
+    font-family: var(--font-mono), monospace;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    transition: background 0.08s ease, color 0.08s ease, transform 0.08s ease;
+  }
+  .btn-brutal-accent:hover {
+    background: var(--background);
+    color: var(--accent);
+    transform: translate(-1px, -1px);
+  }
+
+  /* Inputs: terminal command field */
   .input-brutal {
     border: 2px solid var(--border);
-    background: var(--background);
+    background: var(--cyber-surface);
     color: var(--foreground);
     font-family: var(--font-mono), monospace;
     text-transform: uppercase;
@@ -305,31 +420,127 @@
   .input-brutal:focus {
     outline: none;
     border-color: var(--accent);
-    box-shadow: 3px 3px 0 0 var(--accent);
+    box-shadow: 0 0 0 1px var(--accent);
   }
 
-  /* Cards: square, thick border, no shadow */
+  /* Cards: dossier data block with optional header strip */
   .card-brutal {
     border: 2px solid var(--border);
-    background: var(--card);
+    background: var(--cyber-surface);
   }
 
-  /* Badge: square, thick border */
+  /* Badge / tag — stamped status label */
   .badge-brutal {
     border: 2px solid var(--border);
     text-transform: uppercase;
+    font-family: var(--font-mono), monospace;
     font-weight: 700;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
+    font-size: 10px;
+    padding: 2px 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
   }
 
-  /* Tag label — editorial */
+  /* Status tags — colored stamped labels */
+  .status-found {
+    background: var(--accent);
+    color: var(--background);
+    border-color: var(--accent);
+  }
+  .status-missing {
+    background: var(--destructive);
+    color: #FFFFFF;
+    border-color: var(--destructive);
+  }
+  .status-weak {
+    background: transparent;
+    color: var(--chart-3);
+    border-color: var(--chart-3);
+  }
+  .status-strong {
+    background: var(--accent);
+    color: var(--background);
+    border-color: var(--accent);
+  }
+  .status-archived {
+    background: transparent;
+    color: var(--muted-foreground);
+    border-color: var(--muted-foreground);
+  }
+
+  /* Risk tags */
+  .risk-low { background: var(--accent); color: var(--background); border-color: var(--accent); }
+  .risk-medium { background: var(--chart-3); color: var(--background); border-color: var(--chart-3); }
+  .risk-high { background: var(--destructive); color: #FFFFFF; border-color: var(--destructive); }
+
+  /* Editorial label — terminal prompt style */
   .label-brutal {
     font-family: var(--font-mono), monospace;
     font-size: 10px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.14em;
     color: var(--muted-foreground);
+  }
+  .label-brutal-accent {
+    font-family: var(--font-mono), monospace;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+  }
+
+  /* Block meter — ASCII-style progress bar */
+  .block-meter {
+    font-family: var(--font-mono), monospace;
+    font-size: 11px;
+    letter-spacing: 0;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  /* Dossier section header — terminal panel header strip */
+  .dossier-header {
+    background: var(--border);
+    color: var(--background);
+    font-family: var(--font-mono), monospace;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 11px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--border);
+  }
+  .dark .dossier-header {
+    background: var(--foreground);
+    color: var(--background);
+  }
+
+  /* Scan log line */
+  .scan-log {
+    font-family: var(--font-mono), monospace;
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--muted-foreground);
+  }
+  .scan-log .ts {
+    color: var(--accent);
+    margin-right: 8px;
+  }
+  .scan-log .ok {
+    color: var(--accent);
+  }
+  .scan-log .err {
+    color: var(--destructive);
+  }
+  .scan-log .warn {
+    color: var(--chart-3);
   }
 }
 
@@ -350,10 +561,10 @@
     var(--muted) 75%
   );
   background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
+  animation: shimmer 1.2s infinite;
 }
 
-/* Heatmap cells — keep transitions minimal */
+/* Heatmap cells — minimal transition */
 .heatmap-cell {
   transition: transform 0.08s ease;
 }
@@ -368,8 +579,12 @@
 @media print {
   .no-print { display: none !important; }
   .print-break { page-break-after: always; }
-  body { background: white !important; color: black !important; }
-  .glass, .glass-strong {
+  body {
+    background: white !important;
+    color: black !important;
+    background-image: none !important;
+  }
+  .glass, .glass-strong, .terminal-panel {
     background: white !important;
     border: 1px solid #000 !important;
   }
