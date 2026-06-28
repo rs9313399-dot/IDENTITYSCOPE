@@ -75,7 +75,7 @@ export function BlockMeter({
   width?: number
 }) {
   const color =
-    value >= 70 ? '#00FF66' : value >= 40 ? '#FFD60A' : '#FF3B30'
+    value >= 70 ? 'var(--chart-5)' : value >= 40 ? 'var(--accent)' : 'var(--destructive)'
   return (
     <div className="font-mono text-xs leading-relaxed">
       {label && <div className="text-muted-foreground uppercase tracking-wider mb-0.5">{label}</div>}

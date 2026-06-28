@@ -29,13 +29,7 @@ interface ShareModalProps {
 export function ShareModal({ open, onClose, report }: ShareModalProps) {
   const [copied, setCopied] = React.useState<string | null>(null)
   const [includeScores, setIncludeScores] = React.useState(true)
-  const [shareUrl, setShareUrl] = React.useState('')
-
-  React.useEffect(() => {
-    if (open) {
-      setShareUrl(window.location.href)
-    }
-  }, [open])
+  const shareUrl = typeof window === 'undefined' ? '' : window.location.href
 
   if (!open || !report) return null
 

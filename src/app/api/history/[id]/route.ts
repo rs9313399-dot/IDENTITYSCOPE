@@ -10,9 +10,13 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const scan = await db.scan.findUnique({ where: { id } })
-  if (!scan) return NextResponse.json({ error: 'Not found' }, { status: 404 })
-  return NextResponse.json(scan)
+  try {
+    const scan = await db.scan.findUnique({ where: { id } })
+    if (!scan) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    return NextResponse.json(scan)
+  } catch {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 })
+  }
 }
 
 export async function DELETE(

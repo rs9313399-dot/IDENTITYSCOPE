@@ -15,11 +15,11 @@ type ButtonVariant = 'default' | 'accent' | 'outline' | 'ghost' | 'danger'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
 const BTN_VARIANTS: Record<ButtonVariant, string> = {
-  default: 'border-2 border-border bg-background text-foreground hover:bg-foreground hover:text-background hover:border-foreground',
-  accent: 'border-2 border-accent bg-accent text-accent-foreground hover:bg-background hover:text-accent',
-  outline: 'border-2 border-border bg-transparent text-foreground hover:bg-foreground hover:text-background',
-  ghost: 'border-2 border-transparent bg-transparent text-foreground hover:bg-secondary hover:border-border',
-  danger: 'border-2 border-[#FF3B30] bg-[#FF3B30] text-white hover:bg-background hover:text-[#FF3B30]',
+  default: 'border-[3px] border-border bg-background text-foreground shadow-brutal hover:bg-foreground hover:text-background hover:border-border',
+  accent: 'border-[3px] border-border bg-accent text-accent-foreground shadow-brutal hover:bg-background hover:text-foreground',
+  outline: 'border-[3px] border-border bg-transparent text-foreground shadow-brutal hover:bg-foreground hover:text-background',
+  ghost: 'border-[3px] border-transparent bg-transparent text-foreground hover:bg-secondary hover:border-border',
+  danger: 'border-[3px] border-border bg-[#F93920] text-white shadow-brutal hover:bg-background hover:text-[#F93920]',
 }
 
 const BTN_SIZES: Record<ButtonSize, string> = {
@@ -41,7 +41,7 @@ export function BrutalButton({
   return (
     <button
       className={cn(
-        'relative inline-flex items-center justify-center font-mono font-bold uppercase tracking-wider transition-all duration-75 active:translate-x-0 active:translate-y-0 hover:-translate-x-0.5 hover:-translate-y-0.5',
+        'relative inline-flex items-center justify-center font-mono font-bold uppercase tracking-wider transition-all duration-75 active:translate-x-0.5 active:translate-y-0.5 hover:-translate-x-1 hover:-translate-y-1',
         BTN_VARIANTS[variant],
         BTN_SIZES[size],
         className
@@ -69,7 +69,7 @@ export function BrutalInput({
       )}
       <input
         className={cn(
-          'w-full bg-[#0A0A0A] border-2 border-border text-foreground font-mono uppercase tracking-wide placeholder:text-muted-foreground placeholder:font-normal focus:outline-none focus:border-accent focus:shadow-[0_0_0_1px_var(--accent)] transition-colors h-12 px-4 text-sm',
+          'w-full bg-card border-[3px] border-border text-foreground font-mono uppercase tracking-wide placeholder:text-muted-foreground placeholder:font-normal focus:outline-none focus:border-border focus:shadow-brutal-accent transition-colors h-12 px-4 text-sm',
           prefix && 'pl-8',
           className
         )}
@@ -95,9 +95,9 @@ export function BrutalCard({
   return (
     <div
       className={cn(
-        'relative bg-[#0A0A0A] border-2 border-border',
-        accentTop && 'before:absolute before:top-0 before:left-0 before:right-0 before:h-[2px] before:bg-accent before:content-[""]',
-        hover && 'transition-all duration-100 hover:-translate-y-0.5 hover:border-accent',
+        'relative bg-card border-[3px] border-border shadow-brutal',
+        accentTop && 'before:absolute before:top-0 before:left-0 before:right-0 before:h-2 before:bg-accent before:content-[""]',
+        hover && 'transition-all duration-100 hover:-translate-x-1 hover:-translate-y-1',
         className
       )}
     >
@@ -112,8 +112,8 @@ type StatusType = 'found' | 'missing' | 'weak' | 'strong' | 'archived' | 'unknow
 
 const STATUS_STYLES: Record<StatusType, { bg: string; text: string; border: string; label: string }> = {
   found:   { bg: 'bg-accent', text: 'text-background', border: 'border-accent', label: 'FOUND' },
-  missing: { bg: 'bg-[#FF3B30]', text: 'text-white', border: 'border-[#FF3B30]', label: 'MISSING' },
-  weak:    { bg: 'bg-transparent', text: 'text-[#FFD60A]', border: 'border-[#FFD60A]', label: 'WEAK' },
+  missing: { bg: 'bg-[#F93920]', text: 'text-white', border: 'border-border', label: 'MISSING' },
+  weak:    { bg: 'bg-transparent', text: 'text-[var(--chart-3)]', border: 'border-[var(--chart-3)]', label: 'WEAK' },
   strong:  { bg: 'bg-accent', text: 'text-background', border: 'border-accent', label: 'STRONG' },
   archived:{ bg: 'bg-transparent', text: 'text-muted-foreground', border: 'border-muted-foreground', label: 'ARCHIVED' },
   unknown: { bg: 'bg-transparent', text: 'text-muted-foreground', border: 'border-border', label: 'UNKNOWN' },
@@ -147,8 +147,8 @@ export function StatusBadge({
 export function RiskBadge({ level }: { level: 'low' | 'medium' | 'high' }) {
   const styles = {
     low: 'bg-accent text-background border-accent',
-    medium: 'bg-[#FFD60A] text-background border-[#FFD60A]',
-    high: 'bg-[#FF3B30] text-white border-[#FF3B30]',
+    medium: 'bg-[var(--chart-3)] text-white border-border',
+    high: 'bg-[#F93920] text-white border-border',
   }
   return (
     <span className={cn('inline-flex items-center border-2 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-widest', styles[level])}>
@@ -172,28 +172,26 @@ export function ScoreMeter({
 }) {
   const ref = React.useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-5% 0px' })
-  const [displayVal, setDisplayVal] = React.useState(0)
+  const [animatedVal, setAnimatedVal] = React.useState(0)
 
-  const color = value >= 70 ? '#00FF66' : value >= 40 ? '#FFD60A' : '#FF3B30'
+  const color = value >= 70 ? 'var(--chart-5)' : value >= 40 ? 'var(--accent)' : 'var(--destructive)'
 
   React.useEffect(() => {
-    if (!inView || !animated) {
-      setDisplayVal(value)
-      return
-    }
+    if (!inView || !animated) return
     let raf = 0
     const start = performance.now()
     const dur = 800
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / dur)
       const eased = 1 - Math.pow(1 - t, 3)
-      setDisplayVal(Math.round(value * eased))
+      setAnimatedVal(Math.round(value * eased))
       if (t < 1) raf = requestAnimationFrame(tick)
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
   }, [inView, value, animated])
 
+  const displayVal = animated ? animatedVal : value
   const filled = Math.round((displayVal / 100) * width)
 
   return (
@@ -236,9 +234,9 @@ export function TerminalPanel({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-5% 0px' }}
       transition={{ duration: 0.3, delay, ease: [0.22, 1, 0.36, 1] }}
-      className={cn('relative bg-[#0A0A0A] border-2 border-border', className)}
+      className={cn('relative bg-card border-[3px] border-border shadow-brutal', className)}
     >
-      <div className="flex items-center justify-between bg-foreground text-background px-3 py-1.5 border-b-2 border-border">
+      <div className="flex items-center justify-between bg-foreground text-background px-3 py-1.5 border-b-[3px] border-border">
         <span className="font-mono text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
           <span className="inline-block h-1.5 w-1.5 bg-accent" />
           {label}
@@ -269,8 +267,8 @@ export function ScanLog({
   const colorClass = {
     default: 'text-muted-foreground',
     ok: 'text-accent',
-    err: 'text-[#FF3B30]',
-    warn: 'text-[#FFD60A]',
+    err: 'text-destructive',
+    warn: 'text-[var(--chart-3)]',
   }[variant]
 
   return (
@@ -311,10 +309,10 @@ export function DossierSection({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-5% 0px' }}
       transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-      className={cn('relative bg-[#0A0A0A] border-2 border-border', className)}
+      className={cn('relative bg-card border-[3px] border-border shadow-brutal', className)}
     >
-      <div className="flex items-stretch border-b-2 border-border">
-        <div className="flex items-center px-3 py-2 bg-foreground text-background border-r-2 border-border">
+      <div className="flex items-stretch border-b-[3px] border-border">
+        <div className="flex items-center px-3 py-2 bg-foreground text-background border-r-[3px] border-border">
           <span className="font-mono text-xs font-bold tabular-nums">{number}</span>
         </div>
         <div className="flex-1 flex items-center justify-between px-3 py-2">
@@ -367,7 +365,7 @@ export function BgText({
         fontSize: 'clamp(6rem, 16vw, 14rem)',
         color: 'var(--border)',
         opacity: 0.025,
-        letterSpacing: '-0.05em',
+        letterSpacing: '0',
         lineHeight: 0.8,
       }}
       aria-hidden

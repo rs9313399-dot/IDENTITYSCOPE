@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   icons: {
     icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
   },
-  // Lock Dark Reader — our app is already dark-themed. This prevents the
+  // Lock Dark Reader — our app already controls contrast heavily. This prevents the
   // browser extension from injecting data-darkreader-* attributes into SVGs
   // which causes React hydration mismatches.
   other: {
@@ -64,7 +64,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Lock Dark Reader — our app is already dark-themed. Prevents the
+        {/* Lock Dark Reader — our app already controls contrast heavily. Prevents the
             extension from injecting data-darkreader-* attributes into SVGs
             which causes React hydration mismatches. */}
         <meta name="darkreader-lock" content="" />
@@ -75,7 +75,7 @@ export default function RootLayout({
       >
         <ThemeProvider
           attribute="class"
-          defaultTheme="dark"
+          defaultTheme="light"
           enableSystem={false}
           disableTransitionOnChange
         >

@@ -413,7 +413,7 @@ const SCAN_LINES = [
   { delay: 1000, text: 'GITHUB: FOUND', color: 'text-accent font-bold' },
   { delay: 1400, text: 'CODEFORCES: FOUND', color: 'text-accent font-bold' },
   { delay: 1800, text: 'DEV.TO: NOT_FOUND', color: 'text-muted-foreground' },
-  { delay: 2200, text: 'PORTFOLIO: WEAK_SIGNAL', color: 'text-[#FFD60A]' },
+  { delay: 2200, text: 'PORTFOLIO: WEAK_SIGNAL', color: 'text-[var(--chart-3)]' },
   { delay: 2600, text: 'NPM: 3 PKGS', color: 'text-accent font-bold' },
   { delay: 3000, text: 'SCORE: 78/100', color: 'text-accent font-bold' },
 ]
@@ -431,9 +431,9 @@ function AnimatedTerminalPreview() {
   }, [])
 
   return (
-    <div className="relative bg-[#0A0A0A] border-2 border-border">
+    <div className="relative bg-card border-[4px] border-border shadow-brutal-lg">
       {/* Header strip */}
-      <div className="flex items-center justify-between bg-foreground text-background px-3 py-1.5 border-b-2 border-border">
+      <div className="flex items-center justify-between bg-foreground text-background px-3 py-1.5 border-b-[3px] border-border">
         <span className="font-mono text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
           <span className="inline-block h-1.5 w-1.5 bg-accent animate-pulse" />
           IDENTITYSCOPE_AI

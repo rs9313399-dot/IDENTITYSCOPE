@@ -55,8 +55,11 @@ export function DiffModal({ open, onClose, currentReport }: DiffModalProps) {
 
   React.useEffect(() => {
     if (!open) {
-      setSelectedId(null)
-      setPastReport(null)
+      const t = setTimeout(() => {
+        setSelectedId(null)
+        setPastReport(null)
+      }, 0)
+      return () => clearTimeout(t)
     }
   }, [open])
 

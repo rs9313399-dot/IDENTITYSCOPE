@@ -24,17 +24,21 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function GET() {
-  const scans = await db.scan.findMany({
-    where: { bookmarked: true },
-    orderBy: { createdAt: 'desc' },
-    select: {
-      id: true,
-      query: true,
-      queryType: true,
-      github: true,
-      overallScore: true,
-      createdAt: true,
-    },
-  })
-  return NextResponse.json({ scans })
+  try {
+    const scans = await db.scan.findMany({
+      where: { bookmarked: true },
+      orderBy: { createdAt: 'desc' },
+      select: {
+        id: true,
+        query: true,
+        queryType: true,
+        github: true,
+        overallScore: true,
+        createdAt: true,
+      },
+    })
+    return NextResponse.json({ scans })
+  } catch {
+    return NextResponse.json({ scans: [] })
+  }
 }

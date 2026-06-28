@@ -4,8 +4,8 @@ import * as React from 'react'
 import { useAppStore, ACCENT_COLORS } from '@/stores/app-store'
 
 /**
- * Applies the user's selected cyber-brutalist accent color.
- * All accents use dark text on them (#050505) since they're bright neon colors.
+ * Applies the user's selected brutalist accent color.
+ * Accent blocks use dark ink text for the poster-like theme.
  */
 export function AccentColorProvider({ children }: { children: React.ReactNode }) {
   const accent = useAppStore((s) => s.settings.accentColor)

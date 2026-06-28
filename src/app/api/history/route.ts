@@ -21,23 +21,27 @@ export async function GET(req: NextRequest) {
   if (q) where.query = { contains: q }
   if (bookmarkedOnly) where.bookmarked = true
 
-  const scans = await db.scan.findMany({
-    where,
-    orderBy: { createdAt: 'desc' },
-    take: limit,
-    select: {
-      id: true,
-      query: true,
-      queryType: true,
-      github: true,
-      email: true,
-      website: true,
-      overallScore: true,
-      developerScore: true,
-      portfolioScore: true,
-      bookmarked: true,
-      createdAt: true,
-    },
-  })
-  return NextResponse.json({ scans })
+  try {
+    const scans = await db.scan.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+      select: {
+        id: true,
+        query: true,
+        queryType: true,
+        github: true,
+        email: true,
+        website: true,
+        overallScore: true,
+        developerScore: true,
+        portfolioScore: true,
+        bookmarked: true,
+        createdAt: true,
+      },
+    })
+    return NextResponse.json({ scans })
+  } catch {
+    return NextResponse.json({ scans: [] })
+  }
 }

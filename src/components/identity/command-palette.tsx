@@ -121,16 +121,15 @@ export function CommandPalette({
     )
   }, [commands, query])
 
-  // Reset selection when query changes
-  React.useEffect(() => {
-    setSelectedIndex(0)
-  }, [query])
-
   // Focus input when opened
   React.useEffect(() => {
     if (open) {
-      setQuery('')
-      setTimeout(() => inputRef.current?.focus(), 50)
+      const t = setTimeout(() => {
+        setQuery('')
+        setSelectedIndex(0)
+        inputRef.current?.focus()
+      }, 50)
+      return () => clearTimeout(t)
     }
   }, [open])
 
@@ -199,7 +198,10 @@ export function CommandPalette({
             <input
               ref={inputRef}
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => {
+                setQuery(e.target.value)
+                setSelectedIndex(0)
+              }}
               onKeyDown={handleKeyDown}
               placeholder="Search commands or scan a username..."
               className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
