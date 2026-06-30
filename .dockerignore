@@ -1,0 +1,17 @@
+.git
+.next
+.vercel
+node_modules
+coverage
+out
+build
+db
+download
+tool-results
+upload
+*.log
+dev.log
+server.log
+.env*
+*.tsbuildinfo
+workspace-*
