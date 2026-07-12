@@ -87,7 +87,7 @@ export default function RootLayout({
             <SonnerToaster position="top-right" richColors closeButton />
           </QueryProvider>
         </ThemeProvider>
-	<Analytics />
+        <Analytics />
       </body>
     </html>
   );
