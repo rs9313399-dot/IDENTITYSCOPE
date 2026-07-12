@@ -6,7 +6,7 @@ import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { QueryProvider } from "@/components/query-provider";
 import { AccentColorProvider } from "@/components/accent-color-provider";
-
+import { Analytics } from "@vercel/analytics/next";
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-space-grotesk",
   subsets: ["latin"],
@@ -87,6 +87,7 @@ export default function RootLayout({
             <SonnerToaster position="top-right" richColors closeButton />
           </QueryProvider>
         </ThemeProvider>
+	<Analytics />
       </body>
     </html>
   );
